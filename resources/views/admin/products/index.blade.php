@@ -82,7 +82,7 @@
 
         <div class="table-responsive">
 
-            <table class="table table-hover align-middle">
+            <table class="table align-middle">
 
                 <thead class="table-light">
 

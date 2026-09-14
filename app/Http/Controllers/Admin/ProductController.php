@@ -72,7 +72,7 @@ class ProductController extends Controller
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         
         // Sauvegarde dans public/uploads/products
-        $file->move(public_path('uploads/products'), $filename);
+        $file->move(public_path('images/products'), $filename);
         
         // Affectation du nom de fichier à l'objet instancié
         $product->image = $filename;

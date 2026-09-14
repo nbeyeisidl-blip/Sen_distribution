@@ -5,8 +5,7 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>
         @yield('title', 'Caissier - SEN DISTRIBUTION')
@@ -72,6 +71,44 @@
             border-radius: 14px;
         }
 
+
+        /* 1. Gestion globale pour mobile */
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden; /* Empêche le défilement horizontal indésirable de la page */
+    }
+
+    /* 2. Adaptation des tableaux sur tous les téléphones */
+    .table-responsive {
+        width: 100%;
+        margin-bottom: 1rem;
+        overflow-y: hidden;
+        -ms-overflow-style: -ms-autohide-scrollbar;
+        -webkit-overflow-scrolling: touch; /* Défilement fluide sur iOS / iPhone */
+    }
+
+    /* 3. Adaptation dynamique des cartes et formulaires */
+    @media (max-width: 768px) {
+        .container, .container-fluid {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        /* Ajustement de la taille du texte et des boutons sur petit écran */
+        h1, .h1 { font-size: 1.5rem; }
+        h2, .h2 { font-size: 1.3rem; }
+        
+        .btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Ajustement des images pour qu'elles ne dépassent jamais */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    }
     </style>
 
 </head>
