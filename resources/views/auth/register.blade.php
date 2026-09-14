@@ -65,21 +65,7 @@
                     </div>
 
                     <!-- Sélection du Rôle -->
-                    <div class="mb-3">
-                        <label for="role" class="form-label fw-semibold">Type de compte (Rôle)</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-shield-person"></i></span>
-                            <select name="role" id="role" class="form-select @error('role') is-invalid @enderror" required>
-                                <option value="client" {{ old('role', 'client') == 'client' ? 'selected' : '' }}>Client</option>
-                                <option value="cashier" {{ old('role') == 'cashier' || old('role') == 'caissier' ? 'selected' : '' }}>Caissier</option>
-                               <option value="stock_manager" {{ old('role') == 'stock_manager' || old('role') == 'magasinier' ? 'selected' : '' }}>Magasinier</option>
-                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrateur</option>
-                            </select>
-                        </div>
-                        @error('role')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    
 
                     <!-- Mot de passe -->
                     <div class="mb-3">
