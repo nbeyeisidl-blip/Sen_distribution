@@ -107,7 +107,9 @@ Route::middleware(['admin'])
     Route::delete('/sales/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
     });
 
+use App\Http\Controllers\ProductController;
 
+Route::get('/', [ProductController::class, 'index'])->name('home');
 // ======================================================
 // ESPACE CAISSIER
 // ======================================================
