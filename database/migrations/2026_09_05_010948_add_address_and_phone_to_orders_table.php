@@ -26,5 +26,5 @@ public function down(): void
         });
     }
 
-    
+}  
 };

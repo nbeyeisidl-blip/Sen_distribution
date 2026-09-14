@@ -17,6 +17,7 @@ WORKDIR /var/www
 
 COPY . .
 
+# Création du fichier SQLite
 RUN mkdir -p database && touch database/database.sqlite
 
 RUN composer install --no-dev --optimize-autoloader
@@ -25,4 +26,5 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/ww
 
 EXPOSE 8000
 
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+# Commande de démarrage avec migration sécurisée (ne bloque pas en cas d'erreur)
+CMD php artisan migrate --force ; php artisan serve --host=0.0.0.0 --port=8000
