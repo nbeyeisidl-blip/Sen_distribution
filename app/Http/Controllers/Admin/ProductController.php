@@ -48,51 +48,41 @@ class ProductController extends Controller
      * Enregistrer un produit
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
+{
+    // 1. Validation des champs
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'price' => 'required|numeric',
+        'stock' => 'required|integer',
+        'description' => 'nullable|string',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+    ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | ENREGISTREMENT DE L'IMAGE
-        |--------------------------------------------------------------------------
-        */
+    // 2. Instanciation obligatoire du modèle Product
+    $product = new Product();
+    $product->name = $request->name;
+    $product->description = $request->description;
+    $product->price = $request->price;
+    $product->stock = $request->stock;
+    $product->category_id = $request->category_id ?? null;
 
-      // Lors de la création d'un produit (méthode store)
-if ($request->hasFile('image')) {
-    $image = $request->file('image');
-    // Générer un nom unique pour éviter les doublons
-    $imageName = time() . '_' . $image->getClientOriginalName();
-    
-    // Déplacer le fichier dans le dossier public/images/products
-    $image->move(public_path('images/products'), $imageName);
-    
-    // Enregistrer seulement le nom du fichier dans la BDD (ex: "1726270000_dior.jpg")
-    $product->image = $imageName;
-}
-$product->save();
-
-        /*
-        |--------------------------------------------------------------------------
-        | CRÉATION DU PRODUIT
-        |--------------------------------------------------------------------------
-        */
-
-        Product::create($validated);
-
-        return redirect()
-            ->route('admin.products.index')
-            ->with(
-                'success',
-                'Produit ajouté avec succès.'
-            );
+    // 3. Gestion du téléversement de l'image
+    if ($request->hasFile('image')) {
+        $file = $request->file('image');
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        
+        // Sauvegarde dans public/uploads/products
+        $file->move(public_path('uploads/products'), $filename);
+        
+        // Affectation du nom de fichier à l'objet instancié
+        $product->image = $filename;
     }
+
+    // 4. Sauvegarde en base de données
+    $product->save();
+
+    return redirect()->route('admin.products.index')->with('success', 'Produit créé avec succès !');
+}
 
     /**
      * Formulaire de modification
