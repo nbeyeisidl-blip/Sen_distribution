@@ -10,6 +10,11 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        
+    $this->call([
+        ProductSeeder::class,
+    ]);
+
         // 1. Appels des autres Seeders
         $this->call([
             AdminUserSeeder::class,
