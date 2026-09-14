@@ -19,12 +19,15 @@ WORKDIR /var/www
 
 COPY . .
 
+# Créer le fichier SQLite et exécuter les migrations
+RUN touch database/database.sqlite
+
 # Installer les dépendances Laravel
 RUN composer install --no-dev --optimize-autoloader
 
 # Configurer les permissions Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database
 
 EXPOSE 8000
 
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
