@@ -17,7 +17,6 @@ WORKDIR /var/www
 
 COPY . .
 
-# Créer le dossier et le fichier SQLite vide si non existants
 RUN mkdir -p database && touch database/database.sqlite
 
 RUN composer install --no-dev --optimize-autoloader
@@ -26,5 +25,4 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/ww
 
 EXPOSE 8000
 
-# Lancer uniquement le serveur web (sans la commande migrate qui fait planter)
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000

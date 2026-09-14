@@ -20,10 +20,11 @@ return new class extends Migration
 
 public function down(): void
 {
-    Schema::table('orders', function (Blueprint $table) {
-        $table->dropColumn(['address', 'phone', 'notes']);
-    });
-}
+    if (!Schema::hasColumn('orders', 'phone')) {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->string('phone')->nullable();
+        });
+    }
 
     
 };
