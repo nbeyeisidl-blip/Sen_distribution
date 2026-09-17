@@ -16,7 +16,7 @@ class StorekeeperController extends Controller
         $totalStock = Product::sum('stock');
         $lowStockCount = Product::where('stock', '<=', 5)->count();
 
-        return view('storekeeper.dashboard', compact('totalProducts', 'totalStock', 'lowStockCount'));
+        return view('Storekeeper.dashboard', compact('totalProducts', 'totalStock', 'lowStockCount'));
     }
 
     // Vue Liste / État du stock
