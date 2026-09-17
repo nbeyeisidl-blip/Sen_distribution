@@ -1,4 +1,4 @@
-@extends('storekeeper.layouts.app')
+@extends('Storekeeper.layouts.app')
 
 @section('content')
 <div class="container-fluid">
