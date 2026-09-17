@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('sales', function (Blueprint $table) {
+            // 1. Supprimer l'ancienne contrainte vers 'users'
+            $table->dropForeign('sales_client_id_foreign');
+
+            // 2. Créer la nouvelle contrainte vers 'clients'
+            $table->foreign('client_id')
+                  ->references('id')
+                  ->on('clients')
+                  ->onDelete('set null');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('sales', function (Blueprint $table) {
+            $table->dropForeign(['client_id']);
+            $table->foreign('client_id')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('set null');
+        });
+    }
+};

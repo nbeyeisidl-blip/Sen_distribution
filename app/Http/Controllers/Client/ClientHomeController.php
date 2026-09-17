@@ -11,6 +11,11 @@ class ClientHomeController extends Controller
 {
     public function index(Request $request)
     {
+        $products = Product::where('stock', '>', 0)
+                       ->latest()
+                       ->take(2) // <-- Limite à 8 produits
+                       ->get();
+
         $query = Product::with('category')->where('stock', '>', 0);
 
         if ($request->has('category_id') && $request->category_id != '') {

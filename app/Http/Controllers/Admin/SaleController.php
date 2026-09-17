@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Notifications\LowStockNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class SaleController extends Controller
 {
@@ -21,31 +22,25 @@ class SaleController extends Controller
     public function index()
     {
         $sales = Sale::with('client')->latest()->paginate(10);
-
         return view('admin.sales.index', compact('sales'));
     }
 
-    /**
-     * Formulaire nouvelle vente
-     */
     public function create()
     {
-        $clients = Client::where('is_active', 1)->orderBy('nom')->get();
+        $clients = User::where('role', 'client')->get();
         $products = Product::where('stock', '>', 0)->orderBy('name')->get();
 
         return view('admin.sales.create', compact('clients', 'products'));
     }
 
-    /**
-     * Enregistrer une vente
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'client_id' => ['nullable', 'exists:clients,id'],
+            'client_id'      => ['nullable', 'exists:clients,id'],
+            'client_name'    => ['nullable', 'string', 'max:255'],
             'payment_method' => ['required', 'string', 'max:50'],
-            'products' => ['required', 'array'],
-            'products.*.id' => ['required', 'exists:products,id'],
+            'products'       => ['required', 'array'],
+            'products.*.id'  => ['required', 'exists:products,id'],
             'products.*.quantity' => ['required', 'integer', 'min:0'],
         ]);
 
@@ -60,8 +55,8 @@ class SaleController extends Controller
         try {
             $sale = DB::transaction(function () use ($request, $selectedProducts) {
                 $sale = Sale::create([
-                    'client_id' => $request->client_id,
-                    'total' => 0,
+                    'client_id'      => $request->client_id,
+                    'total'          => 0,
                     'payment_method' => $request->payment_method,
                 ]);
 
@@ -72,18 +67,18 @@ class SaleController extends Controller
                     $quantity = (int) $item['quantity'];
 
                     if ($quantity > $product->stock) {
-                        throw new \Exception("Stock insuffisant pour : {$product->name}");
+                        throw new Exception("Stock insuffisant pour le produit : {$product->name}");
                     }
 
                     $price = (float) $product->price;
                     $subtotal = $price * $quantity;
 
                     SaleItem::create([
-                        'sale_id' => $sale->id,
+                        'sale_id'    => $sale->id,
                         'product_id' => $product->id,
-                        'quantity' => $quantity,
-                        'price' => $price,
-                        'subtotal' => $subtotal,
+                        'quantity'   => $quantity,
+                        'price'      => $price,
+                        'subtotal'   => $subtotal,
                     ]);
 
                     $product->decrement('stock', $quantity);
@@ -96,10 +91,10 @@ class SaleController extends Controller
                     }
 
                     StockMovement::create([
-                        'product_id' => $product->id,
-                        'type' => 'sortie',
-                        'quantity' => $quantity,
-                        'reference' => 'Vente #' . $sale->id,
+                        'product_id'  => $product->id,
+                        'type'        => 'sortie',
+                        'quantity'    => $quantity,
+                        'reference'   => 'Vente #' . $sale->id,
                         'description' => 'Sortie suite à une vente',
                     ]);
 
@@ -111,8 +106,10 @@ class SaleController extends Controller
                 return $sale;
             });
 
-            return redirect()->route('admin.sales.show', $sale->id)->with('success', 'Vente enregistrée avec succès.');
-        } catch (\Exception $e) {
+            return redirect()->route('admin.sales.show', $sale->id)
+                             ->with('success', 'Vente enregistrée avec succès.');
+
+        } catch (Exception $e) {
             return back()->withInput()->withErrors(['error' => $e->getMessage()]);
         }
     }
@@ -150,6 +147,29 @@ class SaleController extends Controller
             'products.*.id' => ['required', 'exists:products,id'],
             'products.*.quantity' => ['required', 'integer', 'min:0'],
         ]);
+
+
+        // 1. Déterminer le nom du client à enregistrer
+    $clientName = 'Client de passage';
+
+    if ($request->filled('client_id')) {
+        // Si un client a été choisi dans la liste déroulante
+        $client = Client::find($request->client_id);
+        $clientName = $client ? $client->name : 'Client comptoir';
+    } elseif ($request->filled('client_name')) {
+        $clientName = $request->client_name;
+    }
+
+    // 2. Création de la vente
+    $sale = Sale::create([
+        'code' => 'VTS-' . str_pad(Sale::count() + 1, 5, '0', STR_PAD_LEFT),
+        'user_id' => auth()->id(), // L'admin ou caissier qui a fait la vente
+        'client_id' => $request->client_id ?? null,
+        'client_name' => $clientName, // <-- Enregistre la valeur choisie et non "admin"
+        'total' => $request->total,
+        'payment_method' => $request->payment_method,
+    ]);
+
 
         $selectedProducts = collect($request->products)
             ->filter(fn($item) => (int)$item['quantity'] > 0)

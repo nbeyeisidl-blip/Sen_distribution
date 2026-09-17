@@ -18,7 +18,7 @@
     <style>
         body {
             background: #f5f7fb;
-            color: #1f2937;
+            color: #283f5e;
             display: flex;
             flex-direction: column;
             min-height: 100vh;

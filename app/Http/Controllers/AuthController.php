@@ -75,6 +75,7 @@ class AuthController extends Controller
                 return redirect()->route('cashier.dashboard');
 
             case 'magasinier':
+            case 'storekeeper':
             case 'stock_manager':
                 return redirect()->route('storekeeper.dashboard');
 
@@ -103,7 +104,7 @@ class AuthController extends Controller
         $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'role'     => ['nullable', 'string', 'in:client,cashier,caissier,admin'],
+            'role'     => ['nullable', 'string', 'in:client,cashier,caissier,admin,magasinier,storekeeper'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 

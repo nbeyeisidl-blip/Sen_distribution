@@ -11,6 +11,7 @@ class Sale extends Model
     protected $fillable = [
     'caissier_id',
     'client_id',
+    'client_name',
     'total',
     'total_amount',
     'payment_method',

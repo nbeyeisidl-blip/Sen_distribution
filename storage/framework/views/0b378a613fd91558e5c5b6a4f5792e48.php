@@ -5,7 +5,7 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Magasinier - SEN DISTRIBUTION</title>
     
-    {{-- CSS Bootstrap 5 & Bootstrap Icons --}}
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
@@ -59,7 +59,7 @@
 <div class="container-fluid">
     <div class="row">
 
-        {{-- BARRE DE NAVIGATION LATÉRALE (SIDEBAR) --}}
+        
         <div class="col-md-3 col-lg-2 sidebar p-3 d-flex flex-column justify-content-between">
             <div>
                 <div class="d-flex align-items-center gap-2 mb-4 px-2">
@@ -68,48 +68,48 @@
                 </div>
 
                 <nav class="nav flex-column">
-    {{-- Tableau de bord --}}
-    <a href="{{ route('storekeeper.dashboard') }}" class="{{ request()->routeIs('storekeeper.dashboard') ? 'active' : '' }}">
+    
+    <a href="<?php echo e(route('storekeeper.dashboard')); ?>" class="<?php echo e(request()->routeIs('storekeeper.dashboard') ? 'active' : ''); ?>">
         <i class="bi bi-speedometer2 me-2"></i> Tableau de bord
     </a>
 
-    {{-- Produits --}}
-    <a href="{{ route('storekeeper.products.index') }}" class="{{ request()->routeIs('storekeeper.products.*') ? 'active' : '' }}">
+    
+    <a href="<?php echo e(route('storekeeper.products.index')); ?>" class="<?php echo e(request()->routeIs('storekeeper.products.*') ? 'active' : ''); ?>">
         <i class="bi bi-box me-2"></i> Produits
     </a>
 
-    {{-- Stock --}}
-    <a href="{{ route('storekeeper.stock.index') }}" class="{{ request()->routeIs('storekeeper.stock.index') ? 'active' : '' }}">
+    
+    <a href="<?php echo e(route('storekeeper.stock.index')); ?>" class="<?php echo e(request()->routeIs('storekeeper.stock.index') ? 'active' : ''); ?>">
         <i class="bi bi-diagram-3 me-2"></i> Stock
     </a>
 
-    {{-- Entrée de stock --}}
-    <a href="{{ route('storekeeper.stock.entry') }}" class="{{ request()->routeIs('storekeeper.stock.entry') ? 'active' : '' }}">
+    
+    <a href="<?php echo e(route('storekeeper.stock.entry')); ?>" class="<?php echo e(request()->routeIs('storekeeper.stock.entry') ? 'active' : ''); ?>">
         <i class="bi bi-arrow-down-right-square me-2"></i> Entrée de stock
     </a>
 
-    {{-- Mouvements --}}
-    <a href="{{ route('storekeeper.movements.index') }}" class="{{ request()->routeIs('storekeeper.movements.*') ? 'active' : '' }}">
+    
+    <a href="<?php echo e(route('storekeeper.movements.index')); ?>" class="<?php echo e(request()->routeIs('storekeeper.movements.*') ? 'active' : ''); ?>">
         <i class="bi bi-arrow-left-right me-2"></i> Mouvements
     </a>
-<a href="{{ route('storekeeper.suppliers.index') }}" class="nav-link {{ request()->routeIs('storekeeper.suppliers.*') ? 'active' : '' }}">
+<a href="<?php echo e(route('storekeeper.suppliers.index')); ?>" class="nav-link <?php echo e(request()->routeIs('storekeeper.suppliers.*') ? 'active' : ''); ?>">
     <i class="bi bi-truck me-2"></i> Fournisseurs
 </a>
-<a href="{{ route('storekeeper.restock.index') }}" class="{{ request()->routeIs('storekeeper.restock.*') ? 'active' : '' }}">
+<a href="<?php echo e(route('storekeeper.restock.index')); ?>" class="<?php echo e(request()->routeIs('storekeeper.restock.*') ? 'active' : ''); ?>">
     <i class="bi bi-arrow-repeat me-2"></i> Réapprovisionnement
 </a>
-<a href="{{ route('storekeeper.reports.index') }}" class="{{ request()->routeIs('storekeeper.reports.*') ? 'active' : '' }}">
+<a href="<?php echo e(route('storekeeper.reports.index')); ?>" class="<?php echo e(request()->routeIs('storekeeper.reports.*') ? 'active' : ''); ?>">
     <i class="bi bi-file-earmark-bar-graph me-2"></i> Rapports
 </a>
-<a href="{{ route('storekeeper.notifications.index') }}" class="nav-link {{ request()->routeIs('storekeeper.notifications.*') ? 'active' : '' }}">
+<a href="<?php echo e(route('storekeeper.notifications.index')); ?>" class="nav-link <?php echo e(request()->routeIs('storekeeper.notifications.*') ? 'active' : ''); ?>">
     <i class="bi bi-bell me-2"></i> Notifications
 </a>
                 </nav>
             </div>
 
             <div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('logout')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn btn-danger w-100 fw-bold d-flex align-items-center justify-content-center gap-2">
                         <i class="bi bi-box-arrow-right"></i> Déconnexion
                     </button>
@@ -117,9 +117,9 @@
             </div>
         </div>
 
-        {{-- CONTENU PRINCIPAL --}}
+        
         <div class="col-md-9 col-lg-10 p-4">
-            @yield('content')
+            <?php echo $__env->yieldContent('content'); ?>
         </div>
 
     </div>
@@ -127,4 +127,4 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html><?php /**PATH C:\Users\Ndogaye Béye !!!\Documents\memoir\sen_distribution\resources\views/storekeeper/layouts/app.blade.php ENDPATH**/ ?>

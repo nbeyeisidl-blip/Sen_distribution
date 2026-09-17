@@ -97,19 +97,12 @@ unset($__errorArgs, $__bag); ?>
                         <label for="role" class="form-label fw-semibold">Type de compte (Rôle)</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="bi bi-shield-person"></i></span>
-                            <select name="role" id="role" class="form-select <?php $__errorArgs = ['role'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-                                <option value="client" <?php echo e(old('role', 'client') == 'client' ? 'selected' : ''); ?>>Client</option>
-                                <option value="cashier" <?php echo e(old('role') == 'cashier' || old('role') == 'caissier' ? 'selected' : ''); ?>>Caissier</option>
-                               <option value="stock_manager" <?php echo e(old('role') == 'stock_manager' || old('role') == 'magasinier' ? 'selected' : ''); ?>>Magasinier</option>
-                                <option value="admin" <?php echo e(old('role') == 'admin' ? 'selected' : ''); ?>>Administrateur</option>
-                            </select>
+                            <select name="role" id="role" class="form-select">
+    <option value="client">Client</option>
+    <option value="caissier">Caissier</option>
+    <option value="magasinier">Magasinier</option>
+    <option value="admin">Administrateur</option>
+</select>
                         </div>
                         <?php $__errorArgs = ['role'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');

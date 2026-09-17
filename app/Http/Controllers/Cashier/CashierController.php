@@ -69,17 +69,18 @@ class CashierController extends Controller
             $subtotal += $item['price'] * $item['quantity'];
         }
 
-        $discount = $request->discount ?? 0;
-        $total = max(0, $subtotal - $discount);
+        // app/Http/Controllers/Cashier/CashierController.php
 
-        // 1. Enregistrement avec le statut COMPLETED
-        $order = Order::create([
-            'client_id'      => $request->client_id,
-            'total'          => $total,
-            'discount'       => $discount,
-            'status'         => 'completed', // FORCER COMPLETED POUR AFFICHER PAYÉ
-            'payment_method' => $request->payment_method,
-        ]);
+$discount = $request->discount ?? 0;
+$total = max(0, $subtotal - $discount);
+
+// 1. Enregistrement avec le statut COMPLETED
+$order = Order::create([
+    'client_id'      => $request->client_id,
+    'total'          => $total,
+    'status'         => 'completed',
+    'payment_method' => $request->payment_method,
+]);
 
         // 2. Création des lignes d'articles et mise à jour du stock
         foreach ($request->items as $item) {

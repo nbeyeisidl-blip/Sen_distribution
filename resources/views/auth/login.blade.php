@@ -85,7 +85,7 @@
                 <!-- Lien vers l'inscription Client -->
                 <div class="text-center mt-2">
                     <p class="text-muted mb-0 small">Vous n'avez pas encore de compte ?</p>
-                    <a href="{{ route('register') }}" class="fw-bold text-decoration-none">Créer un compte client</a>
+                    <a href="{{ route('register') }}" class="fw-bold text-decoration-none"> espace client</a>
                 </div>
             </div>
         </div>

@@ -122,12 +122,12 @@
                     <div class="col">
                         <div class="card h-100 border-0 shadow-sm position-relative">
                             
-                            {{-- Image Produit --}}
-                            <div class="bg-light text-center p-3 rounded-top d-flex align-items-center justify-content-center" style="height: 180px;">
-                                <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/default-product.png') }}" 
+                             {{-- Image du produit --}}
+                            <div class="bg-light text-center p-3 rounded-top" style="height: 200px;">
+                                <img src="{{ $product->image && file_exists(public_path('images/products/' . $product->image)) ? asset('images/products/' . $product->image) : asset('images/default-product.png') }}" 
                                      alt="{{ $product->name }}" 
-                                     class="img-fluid" 
-                                     style="max-height: 150px; object-fit: contain;">
+                                     class="img-fluid h-100" 
+                                     style="object-fit: contain;">
                             </div>
 
                             <div class="card-body d-flex flex-column justify-content-between">
