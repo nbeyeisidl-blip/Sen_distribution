@@ -10,6 +10,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug',
+        'parent_id',
         'description',
         'is_active',
     ];
@@ -18,6 +19,17 @@ class Category extends Model
         'is_active' => 'boolean',
     ];
 
+    // Relation pour obtenir la catégorie parente
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    // Relation pour obtenir les sous-catégories d'une catégorie
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

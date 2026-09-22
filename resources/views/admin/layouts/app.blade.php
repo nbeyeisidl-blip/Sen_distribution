@@ -175,7 +175,12 @@
     <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
         <i class="bi bi-cart-check"></i> Commandes
     </a>
-
+<li class="nav-item">
+    <a href="{{ route('admin.comments.index') }}" class="nav-link {{ request()->routeIs('admin.comments.*') ? 'active' : '' }}">
+        <i class="fas fa-comments me-2"></i>
+        <span>Commentaires</span>
+    </a>
+</li>
     <hr class="text-secondary">
 
     <a href="#">

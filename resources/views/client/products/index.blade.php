@@ -1,186 +1,311 @@
 @extends('client.layouts.app')
 
 @section('content')
-<div class="container py-4">
+<style>
+    :root {
+        --primary-jumia: #f68b1e;
+        --primary-hover: #e07b12;
+        --bg-gray: #f1f1f2;
+    }
 
-    {{-- En-tête de la page --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 fw-bold text-dark mb-1">Catalogue des Produits</h1>
-            <p class="text-muted small mb-0">Découvrez l'ensemble de nos articles disponibles chez SEN DISTRIBUTION</p>
+    body {
+        background-color: var(--bg-gray);
+    }
+
+    /* Style général des cartes e-commerce */
+    .jumia-card {
+        background: #fff;
+        border-radius: 4px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        border: 1px solid #f0f0f0;
+    }
+    .jumia-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+        border-color: transparent;
+    }
+
+    /* Wrapper de l'image */
+    .img-wrapper {
+        position: relative;
+        height: 190px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        overflow: hidden;
+    }
+    .img-wrapper img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    /* Badges style Jumia */
+    .badge-discount {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #fef3e6;
+        color: var(--primary-jumia);
+        font-weight: 700;
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        border-radius: 2px;
+    }
+    .badge-express {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background-color: #000;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 2px;
+    }
+
+    /* Typography Produit */
+    .product-title {
+        font-size: 0.85rem;
+        color: #282828;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.6em;
+        line-height: 1.3;
+        margin-bottom: 6px;
+        text-decoration: none;
+    }
+    .product-title:hover {
+        color: var(--primary-jumia);
+    }
+
+    .price-current {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #282828;
+    }
+    .price-old {
+        font-size: 0.8rem;
+        color: #75757a;
+        text-decoration: line-through;
+        margin-left: 6px;
+    }
+
+    /* Bouton Ajouter au panier */
+    .btn-add-jumia {
+        background-color: var(--primary-jumia);
+        color: #fff;
+        border: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-radius: 4px;
+        padding: 8px;
+        width: 100%;
+        text-transform: uppercase;
+        transition: background 0.2s ease;
+    }
+    .btn-add-jumia:hover {
+        background-color: var(--primary-hover);
+        color: #fff;
+    }
+    .btn-add-jumia:disabled {
+        background-color: #ccc;
+        color: #666;
+    }
+
+    /* Filtres Sidebar */
+    .sidebar-block {
+        background: #fff;
+        border-radius: 4px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    .sidebar-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
+</style>
+
+<div class="container py-3">
+
+    {{-- Bandeau Promo Super Affaires --}}
+    <div class="bg-warning bg-gradient text-dark p-3 rounded-2 mb-4 d-flex justify-content-between align-items-center shadow-sm">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-lightning-charge-fill display-6 text-danger me-3"></i>
+            <div>
+                <h5 class="fw-bold mb-0 text-uppercase">Ventes Flash & Meilleurs Prix</h5>
+                <small class="text-dark">Profitez des remises exclusives SEN DISTRIBUTION aujourd'hui</small>
+            </div>
         </div>
-        <a href="{{ route('client.cart.index') }}" class="btn btn-outline-primary position-relative">
-            <i class="bi bi-cart3 me-1"></i> Mon Panier
-            @if(session('cart') && count(session('cart')) > 0)
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    {{ count(session('cart')) }}
-                </span>
-            @endif
+        <a href="{{ route('client.cart.index') }}" class="btn btn-dark btn-sm fw-bold px-3">
+            <i class="bi bi-cart3 me-1"></i> Panier ({{ session('cart') ? count(session('cart')) : 0 }})
         </a>
     </div>
 
-    <div class="row">
+    <div class="row g-3">
 
-        {{-- BARRE LATÉRALE : FILTRES & CATÉGORIES --}}
-        <div class="col-lg-3 mb-4">
+        {{-- SIDEBAR : FILTRES STYLE JUMIA --}}
+        <div class="col-lg-3">
 
-            {{-- 1. Recherche par mot-clé --}}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold py-3 border-bottom">
-                    <i class="bi bi-search me-2 text-primary"></i>Rechercher
+            {{-- 1. Catégories --}}
+            <div class="sidebar-block shadow-sm">
+                <div class="sidebar-title">
+                    <i class="bi bi-list me-2 text-warning"></i>Catégories
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('client.products.index') }}" method="GET">
-                        @if(request('category_id'))
-                            <input type="hidden" name="category_id" value="{{ request('category_id') }}">
-                        @endif
-                        <div class="input-group">
-                            <input type="text" name="search" class="form-control" placeholder="Nom du produit..." value="{{ request('search') }}">
-                            <button class="btn btn-primary" type="submit">
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            {{-- 2. Bloc des Catégories --}}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold py-3 border-bottom">
-                    <i class="bi bi-grid-fill me-2 text-primary"></i>Catégories
-                </div>
-                <div class="list-group list-group-flush">
-                    {{-- Toutes les catégories --}}
+                <div class="nav flex-column nav-pills">
                     <a href="{{ route('client.products.index') }}" 
-                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ !request('category_id') ? 'active fw-bold' : '' }}">
+                       class="nav-link py-1 px-2 text-dark small d-flex justify-content-between align-items-center {{ !request('category_id') ? 'fw-bold text-warning' : '' }}">
                         <span>Toutes les catégories</span>
-                        <span class="badge {{ !request('category_id') ? 'bg-white text-primary' : 'bg-secondary' }} rounded-pill">
-                            {{ $totalProductsCount ?? 0 }}
-                        </span>
+                        <span class="badge bg-light text-dark border">{{ $totalProductsCount ?? 0 }}</span>
                     </a>
-
-                    {{-- Liste dynamique des catégories --}}
                     @foreach($categories as $category)
                         <a href="{{ route('client.products.index', array_merge(request()->except('page'), ['category_id' => $category->id])) }}" 
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ request('category_id') == $category->id ? 'active fw-bold' : '' }}">
+                           class="nav-link py-1 px-2 text-dark small d-flex justify-content-between align-items-center {{ request('category_id') == $category->id ? 'fw-bold text-warning' : '' }}">
                             <span>{{ $category->name }}</span>
-                            <span class="badge {{ request('category_id') == $category->id ? 'bg-white text-primary' : 'bg-light text-dark border' }} rounded-pill">
-                                {{ $category->products_count }}
-                            </span>
+                            <span class="badge bg-light text-dark border">{{ $category->products_count }}</span>
                         </a>
                     @endforeach
                 </div>
             </div>
 
-            {{-- 3. Filtre par prix --}}
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white fw-bold py-3 border-bottom">
-                    <i class="bi bi-sliders me-2 text-primary"></i>Filtrer par Prix
+            {{-- 2. Recherche --}}
+            <div class="sidebar-block shadow-sm">
+                <div class="sidebar-title">
+                    <i class="bi bi-search me-2 text-warning"></i>Recherche
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('client.products.index') }}" method="GET">
-                        @if(request('category_id'))
-                            <input type="hidden" name="category_id" value="{{ request('category_id') }}">
-                        @endif
-                        @if(request('search'))
-                            <input type="hidden" name="search" value="{{ request('search') }}">
-                        @endif
+                <form action="{{ route('client.products.index') }}" method="GET">
+                    @if(request('category_id'))
+                        <input type="hidden" name="category_id" value="{{ request('category_id') }}">
+                    @endif
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control form-control-sm" placeholder="Ex: TV, Téléphone..." value="{{ request('search') }}">
+                        <button class="btn btn-warning btn-sm text-white" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">Prix Max (FCFA)</label>
-                            <input type="number" name="max_price" class="form-control" placeholder="ex: 20000" value="{{ request('max_price') }}">
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-outline-primary btn-sm fw-bold">Appliquer le filtre</button>
-                            @if(request()->hasAny(['category_id', 'search', 'max_price']))
-                                <a href="{{ route('client.products.index') }}" class="btn btn-link btn-sm text-decoration-none text-center text-muted">Réinitialiser</a>
-                            @endif
-                        </div>
-                    </form>
+            {{-- 3. Filtre par Prix --}}
+            <div class="sidebar-block shadow-sm">
+                <div class="sidebar-title">
+                    <i class="bi bi-cash-stack me-2 text-warning"></i>Prix (FCFA)
                 </div>
+                <form action="{{ route('client.products.index') }}" method="GET">
+                    @if(request('category_id'))
+                        <input type="hidden" name="category_id" value="{{ request('category_id') }}">
+                    @endif
+                    @if(request('search'))
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                    @endif
+                    <div class="mb-2">
+                        <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Prix maximum FCFA" value="{{ request('max_price') }}">
+                    </div>
+                    <button type="submit" class="btn btn-outline-dark btn-sm w-100 fw-bold">Appliquer</button>
+                </form>
             </div>
 
         </div>
 
-        {{-- GRILLE DES PRODUITS --}}
+        {{-- GRILLE DES PRODUITS JUMIA / ALIBABA --}}
         <div class="col-lg-9">
 
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
                     <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <p class="text-muted mb-0">Affichage de <strong>{{ $products->count() }}</strong> produit(s)</p>
+            <div class="bg-white p-3 rounded-2 shadow-sm mb-3 d-flex justify-content-between align-items-center">
+                <span class="text-dark fw-bold small">{{ $products->count() }} produit(s) trouvé(s)</span>
+                <span class="badge bg-warning text-dark"><i class="bi bi-truck me-1"></i>Livraison rapide partout au Sénégal</span>
             </div>
 
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+            {{-- Grille 4 colonnes compacte --}}
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-2">
                 @forelse($products as $product)
                     <div class="col">
-                        <div class="card h-100 border-0 shadow-sm position-relative">
+                        <div class="jumia-card h-100 p-2 d-flex flex-column justify-content-between">
                             
-                             {{-- Image du produit --}}
-                            <div class="bg-light text-center p-3 rounded-top" style="height: 200px;">
-                                <img src="{{ $product->image && file_exists(public_path('images/products/' . $product->image)) ? asset('images/products/' . $product->image) : asset('images/default-product.png') }}" 
-                                     alt="{{ $product->name }}" 
-                                     class="img-fluid h-100" 
-                                     style="object-fit: contain;">
-                            </div>
+                            <div>
+                                {{-- Conteneur Image --}}
+                                <div class="img-wrapper mb-2">
+                                    <span class="badge-express">EXPRESS</span>
+                                    
+                                    @if(isset($product->old_price) && $product->old_price > $product->price)
+                                        @php
+                                            $discount = round((($product->old_price - $product->price) / $product->old_price) * 100);
+                                        @endphp
+                                        <span class="badge-discount">-{{ $discount }}%</span>
+                                    @endif
 
-                            <div class="card-body d-flex flex-column justify-content-between">
-                                <div>
-                                    <span class="badge bg-light text-secondary border mb-2">
-                                        {{ $product->category->name ?? 'Général' }}
-                                    </span>
-                                    <h5 class="card-title fw-bold h6 text-truncate mb-2" title="{{ $product->name }}">
-                                        {{ $product->name }}
-                                    </h5>
-                                    <p class="text-primary fw-bold fs-5 mb-2">
-                                        {{ number_format($product->price, 0, ',', ' ') }} FCFA
-                                    </p>
+                                    <a href="{{ route('client.products.show', $product->id) }}">
+                                        <img src="{{ $product->image && file_exists(public_path('images/products/' . $product->image)) ? asset('images/products/' . $product->image) : asset('images/default-product.png') }}" 
+                                             alt="{{ $product->name }}">
+                                    </a>
                                 </div>
 
-                                <div>
-                                    <div class="mb-3">
-                                        @if($product->stock > 0)
-                                            <span class="badge bg-success bg-opacity-10 text-success">
-                                                <i class="bi bi-check-circle me-1"></i>En stock ({{ $product->stock }})
-                                            </span>
-                                        @else
-                                            <span class="badge bg-danger bg-opacity-10 text-danger">
-                                                <i class="bi bi-x-circle me-1"></i>Rupture de stock
-                                            </span>
-                                        @endif
-                                    </div>
+                                {{-- Titre du produit --}}
+                                <a href="{{ route('client.products.show', $product->id) }}" class="product-title" title="{{ $product->name }}">
+                                    {{ $product->name }}
+                                </a>
 
-                                    <div class="d-grid gap-2">
-                                        <a href="{{ route('client.products.show', $product->id) }}" class="btn btn-outline-secondary btn-sm">
-                                            Voir détail
-                                        </a>
-                                        <form action="{{ route('client.cart.add', $product->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn btn-success btn-sm w-100 fw-bold" @if($product->stock <= 0) disabled @endif>
-                                                <i class="bi bi-cart-plus me-1"></i>Ajouter au panier
-                                            </button>
-                                        </form>
+                                {{-- Prix --}}
+                                <div class="mb-1">
+                                    <span class="price-current">{{ number_format($product->price, 0, ',', ' ') }} FCFA</span>
+                                    @if(isset($product->old_price) && $product->old_price > $product->price)
+                                        <span class="price-old">{{ number_format($product->old_price, 0, ',', ' ') }}</span>
+                                    @endif
+                                </div>
+
+                                {{-- Étoiles d'évaluation & Stock --}}
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div class="text-warning extra-small" style="font-size: 0.7rem;">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
                                     </div>
+                                    @if($product->stock > 0)
+                                        <small class="text-success extra-small" style="font-size: 0.7rem;">En stock</small>
+                                    @else
+                                        <small class="text-danger extra-small" style="font-size: 0.7rem;">Épuisé</small>
+                                    @endif
                                 </div>
                             </div>
+
+                            {{-- Bouton Ajouter au Panier --}}
+                            <div>
+                                <form action="{{ route('client.cart.add', $product->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn-add-jumia shadow-sm" @if($product->stock <= 0) disabled @endif>
+                                        <i class="bi bi-cart-plus me-1"></i> J'achète
+                                    </button>
+                                </form>
+                            </div>
+
                         </div>
                     </div>
                 @empty
-                    <div class="col-12 text-center py-5">
-                        <div class="p-5 bg-light rounded shadow-sm">
-                            <i class="bi bi-box-seam display-1 text-muted mb-3 d-block"></i>
-                            <h4 class="fw-bold">Aucun produit trouvé</h4>
-                            <p class="text-muted">Essayez de modifier vos critères de recherche ou de sélection de catégorie.</p>
-                            <a href="{{ route('client.products.index') }}" class="btn btn-primary fw-bold mt-2">
-                                Voir tous les produits
-                            </a>
-                        </div>
+                    <div class="col-12 text-center py-5 bg-white rounded-2 shadow-sm">
+                        <i class="bi bi-shop display-1 text-muted mb-3 d-block"></i>
+                        <h5 class="fw-bold">Aucun produit disponible</h5>
+                        <p class="text-muted small">Modifiez votre recherche ou vos filtres pour voir plus d'articles.</p>
+                        <a href="{{ route('client.products.index') }}" class="btn btn-warning text-white btn-sm fw-bold">
+                            Réinitialiser la recherche
+                        </a>
                     </div>
                 @endforelse
             </div>

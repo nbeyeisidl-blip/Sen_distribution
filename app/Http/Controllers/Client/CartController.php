@@ -15,32 +15,42 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        return view('client.cart.index', compact('cart'));
+        // Calcul du total général
+        $total = array_reduce($cart, function ($carry, $item) {
+            return $carry + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        return view('client.cart.index', compact('cart', 'total'));
     }
 
     /**
      * Ajoute un produit au panier
      */
-    public function add(Request $request, Product $product)
+    public function add(Request $request, $id)
     {
-        
+        $product = Product::findOrFail($id);
+        $quantity = $request->input('quantity', 1);
+
+        // Récupérer le panier actuel en session
         $cart = session()->get('cart', []);
 
-        if (isset($cart[$product->id])) {
-            $cart[$product->id]['quantity']++;
+        // Si le produit existe déjà, on augmente la quantité
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity'] += $quantity;
         } else {
-            $cart[$product->id] = [
-                'id'       => $product->id,
+            // Sinon, on l'ajoute avec toutes ses données (y compris l'image)
+            $cart[$id] = [
                 'name'     => $product->name,
                 'price'    => $product->price,
-                'image'    => $product->image,
-                'quantity' => 1,
+                'quantity' => $quantity,
+                'image'    => $product->image, // Chemin enregistré en BDD
             ];
         }
 
+        // Sauvegarder le panier mis à jour dans la session
         session()->put('cart', $cart);
 
-        return back()->with('success', 'Produit ajouté au panier.');
+        return redirect()->back()->with('success', 'Produit ajouté au panier avec succès !');
     }
 
     /**
@@ -51,10 +61,18 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] = max(
-                1,
-                (int) $request->quantity
-            );
+            $quantity = max(1, (int) $request->quantity);
+
+            // Vérification du stock
+            $product = Product::find($productId);
+            if ($product && $product->stock < $quantity) {
+                return back()->with('error', 'La quantité demandée dépasse le stock disponible.');
+            }
+
+            $cart[$productId]['quantity'] = $quantity;
+
+            // CORRECTION CRITIQUE : Sauvegarder la modification en session
+            session()->put('cart', $cart);
         }
 
         return back()->with('success', 'Panier mis à jour.');
@@ -67,9 +85,10 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        unset($cart[$productId]);
-
-        session()->put('cart', $cart);
+        if (isset($cart[$productId])) {
+            unset($cart[$productId]);
+            session()->put('cart', $cart);
+        }
 
         return back()->with('success', 'Produit supprimé du panier.');
     }

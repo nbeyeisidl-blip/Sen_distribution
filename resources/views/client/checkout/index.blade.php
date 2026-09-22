@@ -1,110 +1,191 @@
 @extends('client.layouts.app')
 
-@section('title', 'Validation de la commande')
-
 @section('content')
 <div class="container my-5">
-    <h2 class="fw-bold mb-4"><i class="bi bi-credit-card me-2"></i>Validation de votre commande</h2>
-
-    @if(session('error'))
+    @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Veuillez corriger les champs suivants :</h6>
+            <ul class="mb-0 ps-3">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <div class="row g-4">
-        <!-- Formulaire de Livraison -->
-        <div class="col-lg-7">
-            <div class="card border-0 shadow-sm p-4">
-                <h4 class="h5 fw-bold mb-3">Informations de livraison & Paiement</h4>
-                <hr class="mb-4">
+    <div class="mb-4">
+        <h2 class="fw-bold"><i class="bi bi-credit-card me-2"></i>Caisse & Finalisation</h2>
+        <p class="text-muted">Veuillez vérifier vos informations de livraison et valider votre commande.</p>
+    </div>
+    <form action="{{ route('client.checkout.store') }}" method="POST">
+        @csrf
+        <div class="row g-4">
+            
+            <!-- Informations de Livraison & Paiement -->
+            <div class="col-lg-7">
+                <!-- Adresse de Livraison -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2 text-primary"></i>Adresse de livraison</h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label fw-semibold">Prénom</label>
+                                <input type="text" class="form-control @error('first_name') is-invalid @enderror" id="first_name" name="first_name" value="{{ old('first_name', Auth::user()->first_name ?? '') }}" required>
+                                @error('first_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                <form action="{{ route('client.checkout.store') }}" method="POST">
-                    @csrf
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label fw-semibold">Nom</label>
+                                <input type="text" class="form-control @error('last_name') is-invalid @enderror" id="last_name" name="last_name" value="{{ old('last_name', Auth::user()->name ?? '') }}" required>
+                                @error('last_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                    <!-- Adresse de livraison -->
-                    <div class="mb-3">
-                        <label for="shipping_address" class="form-label fw-semibold">Adresse de livraison <span class="text-danger">*</span></label>
-                        <textarea name="shipping_address" id="shipping_address" class="form-control @error('shipping_address') is-invalid @enderror" rows="3" placeholder="Saisissez votre adresse complète (Quartier, Rue, Ville...)" required>{{ old('shipping_address') }}</textarea>
-                        @error('shipping_address')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label fw-semibold">Téléphone</label>
+                                <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', Auth::user()->phone ?? '') }}" placeholder="77 000 00 00" required>
+                                @error('phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                    <!-- Numéro de téléphone -->
-                    <div class="mb-3">
-                        <label for="phone" class="form-label fw-semibold">Numéro de téléphone <span class="text-danger">*</span></label>
-                        <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" placeholder="Ex: +221 77 000 00 00" value="{{ old('phone') }}" required>
-                        @error('phone')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                            <div class="col-md-6">
+                                <label for="city" class="form-label fw-semibold">Ville / Région</label>
+                                <input type="text" class="form-control @error('city') is-invalid @enderror" id="city" name="city" value="{{ old('city', 'Dakar') }}" required>
+                                @error('city')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                    <!-- Notes additionnelles -->
-                    <div class="mb-4">
-                        <label for="notes" class="form-label fw-semibold">Notes / Instructions spécifiques (Optionnel)</label>
-                        <textarea name="notes" id="notes" class="form-control @error('notes') is-invalid @enderror" rows="2" placeholder="Indications complémentaires pour le livreur...">{{ old('notes') }}</textarea>
-                        @error('notes')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <!-- Mode de paiement -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Mode de paiement</label>
-                        <div class="form-check p-3 border rounded mb-2 bg-light">
-                            <input class="form-check-input" type="radio" name="payment_method" id="pay_cash" value="cash" checked>
-                            <label class="form-check-label fw-bold" for="pay_cash">
-                                <i class="bi bi-cash-stack text-success me-2"></i>Paiement à la livraison
-                            </label>
-                            <p class="text-muted small mb-0 mt-1">Payez en espèces lorsque le livreur arrive chez vous.</p>
+                            <div class="col-12">
+                                <label for="address" class="form-label fw-semibold">Adresse exacte</label>
+                                <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="2" placeholder="Quartier, rue, numéro de maison..." required>{{ old('address') }}</textarea>
+                                @error('address')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Bouton de confirmation -->
-                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold">
-                        <i class="bi bi-check-circle me-2"></i>Confirmer la commande
-                    </button>
-                </form>
+                <!-- Mode de Paiement -->
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-wallet2 me-2 text-primary"></i>Mode de paiement <span class="text-danger">*</span></h5>
+
+        @error('payment_method')
+            <div class="alert alert-danger py-2 small mb-3">
+                <i class="bi bi-exclamation-triangle me-1"></i> Veuillez choisir un mode de paiement.
             </div>
-        </div>
+        @enderror
 
-        <!-- Récapitulatif du Panier -->
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm p-4 bg-light">
-                <h4 class="h5 fw-bold mb-3">Résumé du panier</h4>
-                <hr>
-
-                <ul class="list-group list-group-flush mb-3 bg-transparent">
-                    @foreach($cart as $id => $item)
-                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0">
-                            <div>
-                                <h6 class="my-0 fw-semibold">{{ $item['name'] }}</h6>
-                                <small class="text-muted">Quantité : {{ $item['quantity'] }} x {{ number_format($item['price'], 0, ',', ' ') }} FCFA</small>
-                            </div>
-                            <span class="fw-bold text-dark">{{ number_format($item['price'] * $item['quantity'], 0, ',', ' ') }} FCFA</span>
-                        </li>
-                    @endforeach
-                </ul>
-
-                <hr>
-
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted">Sous-total</span>
-                    <span class="fw-bold">{{ number_format($total, 0, ',', ' ') }} FCFA</span>
+        <div class="d-flex flex-column gap-3">
+            
+            <!-- Wave -->
+            <label class="form-check p-3 border rounded-3 d-flex align-items-center justify-content-between cursor-pointer payment-option">
+                <div class="d-flex align-items-center">
+                    <input class="form-check-input me-3" type="radio" name="payment_method" id="payment_wave" value="wave" {{ old('payment_method') == 'wave' ? 'checked' : '' }} required>
+                    <div>
+                        <div class="fw-bold text-dark">Wave</div>
+                        <div class="text-muted small">Paiement instantané via votre compte Wave</div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-muted">Frais de livraison</span>
-                    <span class="text-success fw-bold">Calculés à la livraison</span>
-                </div>
+                <span class="badge bg-info text-dark fw-bold px-3 py-2">Wave</span>
+            </label>
 
-                <div class="d-flex justify-content-between align-items-center p-3 bg-white rounded border">
-                    <span class="h5 mb-0 fw-bold">Total Général</span>
-                    <span class="h4 mb-0 fw-bold text-primary">{{ number_format($total, 0, ',', ' ') }} FCFA</span>
+            <!-- Orange Money -->
+            <label class="form-check p-3 border rounded-3 d-flex align-items-center justify-content-between cursor-pointer payment-option">
+                <div class="d-flex align-items-center">
+                    <input class="form-check-input me-3" type="radio" name="payment_method" id="payment_om" value="orange_money" {{ old('payment_method') == 'orange_money' ? 'checked' : '' }}>
+                    <div>
+                        <div class="fw-bold text-dark">Orange Money</div>
+                        <div class="text-muted small">Paiement mobile sécurisé par code #144#</div>
+                    </div>
                 </div>
-            </div>
+                <span class="badge bg-warning text-dark fw-bold px-3 py-2">OM</span>
+            </label>
+
+            <!-- Paiement à la livraison -->
+            <label class="form-check p-3 border rounded-3 d-flex align-items-center justify-content-between cursor-pointer payment-option">
+                <div class="d-flex align-items-center">
+                    <input class="form-check-input me-3" type="radio" name="payment_method" id="payment_cash" value="cash" {{ old('payment_method', 'cash') == 'cash' ? 'checked' : '' }}>
+                    <div>
+                        <div class="fw-bold text-dark">Paiement à la livraison</div>
+                        <div class="text-muted small">Payez en espèces dès réception de votre colis</div>
+                    </div>
+                </div>
+                <i class="bi bi-cash-stack fs-3 text-success"></i>
+            </label>
+
         </div>
     </div>
+</div>
+            </div>
+
+            <!-- Récapitulatif du Panier -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-3 sticky-top" style="top: 20px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3 border-bottom pb-2"><i class="bi bi-bag-check me-2 text-primary"></i>Récapitulatif de la commande</h5>
+
+                        <ul class="list-group list-group-flush mb-3">
+                            @foreach($cart as $id => $item)
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        @if(!empty($item['image']))
+    <img src="{{ Str::startsWith($item['image'], 'http') ? $item['image'] : asset('images/products/' . ltrim(basename($item['image']), '/')) }}" 
+         alt="{{ $item['name'] }}" 
+         class="rounded me-3 border" 
+         style="width: 50px; height: 50px; object-fit: cover;">
+@else
+    <div class="bg-light rounded border me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+        <i class="bi bi-image text-muted"></i>
+    </div>
+                                        @endif
+                                        <div>
+                                            <h6 class="my-0 fw-semibold">{{ $item['name'] }}</h6>
+                                            <small class="text-muted">Quantité : {{ $item['quantity'] }} × {{ number_format($item['price'], 0, ',', ' ') }} FCFA</small>
+                                        </div>
+                                    </div>
+                                    <span class="fw-semibold text-dark">{{ number_format($item['price'] * $item['quantity'], 0, ',', ' ') }} FCFA</span>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Sous-total</span>
+                            <span class="fw-semibold">{{ number_format($total, 0, ',', ' ') }} FCFA</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Frais de livraison</span>
+                            <span class="text-success fw-semibold">À définir à la livraison</span>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fw-bold fs-5">Total</span>
+                            <strong class="text-primary fs-4">{{ number_format($total, 0, ',', ' ') }} FCFA</strong>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-check-circle me-2"></i> Confirmer la commande
+                        </button>
+
+                        <a href="{{ route('client.cart.index') }}" class="btn btn-link w-100 mt-2 text-decoration-none text-muted small">
+                            <i class="bi bi-arrow-left me-1"></i> Modifier le panier
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
 </div>
 @endsection

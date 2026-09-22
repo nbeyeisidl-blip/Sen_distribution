@@ -9,27 +9,24 @@ use Illuminate\Http\Request;
 
 class ClientHomeController extends Controller
 {
-    public function index(Request $request)
+   public function index()
     {
-        $products = Product::where('stock', '>', 0)
-                       ->latest()
-                       ->take(2) // <-- Limite à 8 produits
-                       ->get();
-
-        $query = Product::with('category')->where('stock', '>', 0);
-
-        if ($request->has('category_id') && $request->category_id != '') {
-            $query->where('category_id', $request->category_id);
-        }
-
-        if ($request->has('max_price') && $request->max_price != '') {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        $products = $query->latest()->get();
+        // 1. Catégories principales
         $categories = Category::withCount('products')->get();
 
-        return view('client.home', compact('products', 'categories'));
+        // 2. Ventes Flash (ex: produits récents limités à 6)
+        $flashSales = Product::where('stock', '>', 0)
+                             ->latest()
+                             ->take(6)
+                             ->get();
+
+        // 3. Produits populaires / Recommandés (limités à 12)
+        $products = Product::where('stock', '>', 0)
+                           ->inRandomOrder()
+                           ->take(12)
+                           ->get();
+
+        return view('client.home', compact('categories', 'flashSales', 'products'));
     }
 
 }

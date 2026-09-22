@@ -43,11 +43,16 @@ class ClientProductController extends Controller
     /**
      * Détail produit
      */
-    public function show(Product $product)
-    {
-        return view(
-            'client.products.show',
-            compact('product')
-        );
-    }
+    public function show($id)
+{
+   $product = Product::with(['comments.user'])->findOrFail($id);
+
+    // Récupérer 4 produits de la même catégorie pour les suggestions
+    $similarProducts = Product::where('category_id', $product->category_id)
+        ->where('id', '!=', $product->id)
+        ->take(4)
+        ->get();
+
+    return view('client.products.show', compact('product', 'similarProducts'));
+}
 }

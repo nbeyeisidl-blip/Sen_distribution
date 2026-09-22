@@ -41,7 +41,7 @@
             background: linear-gradient(135deg, #063b78, #0755a0);
             color: white;
             border-radius: 15px;
-            padding: 40px;
+            padding: 20px;
             margin-bottom: 30px;
         }
 
@@ -225,11 +225,6 @@
             </li>
         </ul>
     </div>
-<?php else: ?>
-    
-    <a href="<?php echo e(route('login')); ?>" class="btn btn-primary btn-sm fw-semibold">
-        <i class="bi bi-box-arrow-in-right me-1"></i> Connexion
-    </a>
 <?php endif; ?>
             </div>
 
@@ -309,16 +304,14 @@
                      <li class="mb-1">
                         <a href="<?php echo e(route('client.categories.index')); ?>" class="text-white-50 text-decoration-none">Categories</a>
                     </li>
-                    <li class="mb-1">
-                        <a href="<?php echo e(route('client.cart.index')); ?>" class="text-white-50 text-decoration-none">Panier</a>
-                    </li>
+     
                 </ul>
             </div>
 
             <div class="col-md-4">
                 <h6 class="fw-bold">Contact</h6>
                 <p class="text-white-50 small mb-1">
-                    <i class="bi bi-telephone me-1"></i> +221 33 000 00 00
+                    <i class="bi bi-telephone me-1"></i> +221 76 244 52 49
                 </p>
                 <p class="text-white-50 small mb-0">
                     <i class="bi bi-envelope me-1"></i> contact@sendistribution.com

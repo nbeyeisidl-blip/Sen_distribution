@@ -9,24 +9,15 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request)
-    {
-        $search = $request->search;
+   public function index()
+{
+    $categories = Category::with(['children', 'parent'])->withCount('products')->latest()->get();
+    
+    // Récupère uniquement les catégories qui n'ont PAS de parent_id
+    $parentCategories = Category::whereNull('parent_id')->get();
 
-        $categories = Category::when($search, function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%');
-            })
-            ->withCount('products')
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
-
-        return view('admin.categories.index', compact(
-            'categories',
-            'search'
-        ));
-    }
-
+    return view('admin.categories.index', compact('categories', 'parentCategories'));
+}
     public function create()
     {
         return view('admin.categories.create');
@@ -36,6 +27,7 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
+            'parent_id'   => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
             'is_active' => 'nullable|boolean',
         ]);
@@ -59,12 +51,14 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'parent_id'   => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
             'is_active' => 'nullable|boolean',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
         $validated['is_active'] = $request->boolean('is_active');
+         $validated['parent_id' ]  = $request->parent_id;
 
         $category->update($validated);
 

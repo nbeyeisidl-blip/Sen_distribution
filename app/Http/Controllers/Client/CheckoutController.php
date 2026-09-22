@@ -18,26 +18,33 @@ class CheckoutController extends Controller
 
 public function index()
     {
+        // Récupérer le panier depuis la session
         $cart = session()->get('cart', []);
 
+        // Si le panier est vide, rediriger vers la page du panier ou des produits
         if (empty($cart)) {
-            return redirect()->route('client.cart.index')
-                ->with('error', 'Votre panier est vide.');
+            return redirect()->route('client.cart.index')->with('error', 'Votre panier est vide.');
         }
 
-        $total = array_reduce($cart, function ($carry, $item) {
-            return $carry + ($item['price'] * $item['quantity']);
-        }, 0);
+        // Calculer le total
+        $total = 0;
+        foreach ($cart as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
 
+        // Passer $cart et $total à la vue
         return view('client.checkout.index', compact('cart', 'total'));
     }
-    public function store(Request $request)
+   public function store(Request $request)
 {
     // 1. Validation du formulaire
     $request->validate([
-        'shipping_address' => 'required|string',
-        'phone'            => 'required|string',
-        'payment_method'   => 'required|string',
+        'first_name'     => 'required|string|max:255',
+        'last_name'      => 'required|string|max:255',
+        'phone'          => 'required|string|max:20',
+        'city'           => 'required|string|max:255',
+        'address'        => 'required|string',
+        'payment_method' => 'required|in:wave,orange_money,cash',
     ]);
 
     // 2. Récupération du panier
@@ -52,7 +59,7 @@ public function index()
         $totalAmount += $item['price'] * $item['quantity'];
     }
 
-    // 4. Définition de l'utilisateur connecté (CORRECTION ICI)
+    // 4. Utilisateur connecté
     $user = auth()->user();
 
     // 5. Transaction en base de données
@@ -67,14 +74,21 @@ public function index()
             ]
         );
 
+        // Adresse complète de livraison
+        $fullAddress = $request->address . ', ' . $request->city;
+
         // Créer la commande
         $order = Order::create([
             'client_id'        => $client->id,
             'total'            => $totalAmount,
             'status'           => 'pending',
             'payment_method'   => $request->payment_method,
-            'shipping_address' => $request->shipping_address,
+            'shipping_address' => $request->shipping_address ?? $fullAddress,
+            'first_name'       => $request->first_name,
+            'last_name'        => $request->last_name,
             'phone'            => $request->phone,
+            'city'             => $request->city,
+            'address'          => $request->address,
         ]);
 
         // Décrémenter les stocks des produits
@@ -84,12 +98,14 @@ public function index()
 
         // Notification des administrateurs
         $admins = User::where('role', 'admin')->get();
-        Notification::send($admins, new NewOrderNotification($order));
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new NewOrderNotification($order));
+        }
 
         // Vider le panier de la session
         session()->forget('cart');
     });
 
-    return redirect()->route('client.home')->with('success', 'Votre commande a été enregistrée avec succès !');
+    return redirect()->route('client.orders.index')->with('success', 'Votre commande a été enregistrée avec succès !');
 }
 }

@@ -1,244 +1,192 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Gestion des catégories')
-
-@section('page-title', 'Gestion des catégories')
 
 @section('content')
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-
-    <div>
-        <h3 class="fw-bold mb-1">Catégories</h3>
-        <p class="text-muted mb-0">
-            Gérez les catégories de vos produits.
-        </p>
-    </div>
-
-    <a href="{{ route('admin.categories.create') }}"
-       class="btn btn-primary">
-
-        <i class="bi bi-plus-lg"></i>
-        Ajouter une catégorie
-
-    </a>
-
-</div>
-
-
-@if(session('success'))
-
-    <div class="alert alert-success alert-dismissible fade show">
-
-        <i class="bi bi-check-circle"></i>
-        {{ session('success') }}
-
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert">
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800">Catégories & Sous-Catégories</h2>
+            <p class="text-muted mb-0 small">Organisation hiérarchique du catalogue</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+            <i class="fas fa-plus me-1"></i> Ajouter une Catégorie / Sous-Catégorie
         </button>
-
     </div>
 
-@endif
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-@if(session('error'))
-
-    <div class="alert alert-danger alert-dismissible fade show">
-
-        <i class="bi bi-exclamation-triangle"></i>
-        {{ session('error') }}
-
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert">
-        </button>
-
-    </div>
-
-@endif
-
-
-<div class="card shadow-sm border-0">
-
-    <div class="card-body">
-
-        <!-- RECHERCHE -->
-
-        <form method="GET"
-              action="{{ route('admin.categories.index') }}"
-              class="row g-2 mb-4">
-
-            <div class="col-md-8">
-
-                <input type="text"
-                       name="search"
-                       class="form-control"
-                       value="{{ $search }}"
-                       placeholder="Rechercher une catégorie...">
-
-            </div>
-
-            <div class="col-md-2">
-
-                <button class="btn btn-dark w-100">
-
-                    <i class="bi bi-search"></i>
-                    Rechercher
-
-                </button>
-
-            </div>
-
-            <div class="col-md-2">
-
-                <a href="{{ route('admin.categories.index') }}"
-                   class="btn btn-outline-secondary w-100">
-
-                    Réinitialiser
-
-                </a>
-
-            </div>
-
-        </form>
-
-
-        <!-- TABLE -->
-
-        <div class="table-responsive">
-
-            <table class="table table-hover align-middle">
-
-                <thead class="table-light">
-
-                    <tr>
-
-                        <th>#</th>
-                        <th>Nom</th>
-                        <th>Slug</th>
-                        <th>Produits</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    @forelse($categories as $category)
-
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-
-                            <td>
-                                {{ $category->id }}
-                            </td>
-
-                            <td>
-                                <strong>
-                                    {{ $category->name }}
-                                </strong>
-                            </td>
-
-                            <td>
-                                <span class="text-muted">
-                                    {{ $category->slug }}
-                                </span>
-                            </td>
-
-                            <td>
-
-                                <span class="badge bg-primary">
-                                    {{ $category->products_count }}
-                                </span>
-
-                            </td>
-
-                            <td>
-
-                                @if($category->is_active)
-
-                                    <span class="badge bg-success">
-                                        Active
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Catégorie Parente</th>
+                            <th>Produits</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($categories as $category)
+                            <tr>
+                                <td>
+                                    @if($category->parent_id)
+                                        <span class="text-muted ms-3">— </span><strong>{{ $category->name }}</strong>
+                                    @else
+                                        <strong><i class="fas fa-folder me-1 text-warning"></i> {{ $category->name }}</strong>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($category->parent_id)
+                                        <span class="badge bg-info text-white">Sous-catégorie</span>
+                                    @else
+                                        <span class="badge bg-primary">Catégorie Principale</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($category->parent)
+                                        <span class="badge bg-light text-dark border">{{ $category->parent->name }}</span>
+                                    @else
+                                        <span class="text-muted small">Aucune (Principale)</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ $category->products_count }} produit(s)
                                     </span>
-
-                                @else
-
-                                    <span class="badge bg-secondary">
-                                        Inactive
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-                            <td>
-
-                                <a href="{{ route('admin.categories.edit', $category) }}"
-                                   class="btn btn-sm btn-warning">
-
-                                    <i class="bi bi-pencil"></i>
-
-                                </a>
-
-
-                                <form action="{{ route('admin.categories.destroy', $category) }}"
-                                      method="POST"
-                                      class="d-inline">
-
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit"
-                                            class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Voulez-vous supprimer cette catégorie ?')">
-
-                                        <i class="bi bi-trash"></i>
-
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-1" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editModal{{ $category->id }}">
+                                        Modifier
                                     </button>
+                                    <form action="{{ route('admin.categories.destroy', $category->id) }}" 
+                                          method="POST" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('Voulez-vous supprimer cette catégorie ?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
 
-                                </form>
-
-                            </td>
-
-                        </tr>
-
-                    @empty
-
-                        <tr>
-
-                            <td colspan="6"
-                                class="text-center py-5">
-
-                                <i class="bi bi-tags fs-1 text-muted"></i>
-
-                                <p class="text-muted mt-2">
+                            <!-- Modal de Modification -->
+                            <div class="modal fade" id="editModal{{ $category->id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form action="{{ route('admin.categories.update', $category->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modifier : {{ $category->name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Nom</label>
+                                                    <input type="text" name="name" class="form-control" value="{{ $category->name }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Catégorie Parente (Laissez vide si c'est une catégorie principale)</label>
+                                                    <select name="parent_id" class="form-select">
+                                                        <option value="">Aucune (Catégorie principale)</option>
+                                                        @foreach($parentCategories as $parent)
+                                                            @if($parent->id != $category->id)
+                                                                <option value="{{ $parent->id }}" {{ $category->parent_id == $parent->id ? 'selected' : '' }}>
+                                                                    {{ $parent->name }}
+                                                                </option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Description</label>
+                                                    <textarea name="description" class="form-control" rows="3">{{ $category->description }}</textarea>
+                                                </div>
+                                                <div class="mb-3">
+    <label for="parent_id" class="form-label">Catégorie Parente</label>
+    <select name="parent_id" id="parent_id" class="form-select">
+        <option value="">Aucune (Créer comme Catégorie Principale)</option>
+        @foreach($parentCategories as $parent)
+            <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+        @endforeach
+    </select>
+</div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
                                     Aucune catégorie trouvée.
-                                </p>
-
-                            </td>
-
-                        </tr>
-
-                    @endforelse
-
-                </tbody>
-
-            </table>
-
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-
-        <div class="mt-3">
-
-            {{ $categories->links() }}
-
-        </div>
-
     </div>
-
 </div>
 
+<!-- Modal d'Ajout -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('admin.categories.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter une Catégorie / Sous-Catégorie</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nom de la catégorie</label>
+                        <input type="text" name="name" class="form-control" placeholder="ex: Vêtements, Chaussures, Chemises..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Catégorie Parente</label>
+                        <select name="parent_id" class="form-select">
+                            <option value="" selected>Aucune (Créer comme Catégorie Principale)</option>
+                            @foreach($parentCategories as $parent)
+                                <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Si vous choisissez un parent, cette catégorie deviendra une sous-catégorie.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Description optionnelle..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

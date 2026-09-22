@@ -43,14 +43,23 @@ use App\Http\Controllers\Cashier\SaleController as CashierSaleController;
 // ======================================================
 use App\Http\Controllers\Storekeeper\StorekeeperController;
 use App\Http\Controllers\Storekeeper\ProductController as StorekeeperProductController;
-
+use App\Http\Controllers\CommentController; // Ajustez selon votre contrôleur
 
 // REDIRECTION RACINE
 Route::get('/', function () {
     return redirect()->route('client.home');
 });
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 
+Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
+    Route::get('/comments', [AdminCommentController::class, 'index'])->name('comments.index');
+    Route::delete('/comments/{comment}', [AdminCommentController::class, 'destroy'])->name('comments.destroy');
+});
+Route::post('/client/products/{product}/comments', [CommentController::class, 'store'])->name('client.comments.store');
+use App\Http\Controllers\ContactController;
 
+Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
+Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 // ======================================================
 // AUTHENTIFICATION UNIFIÉE
 // ======================================================
@@ -64,6 +73,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/orders', [ClientOrderController::class, 'index'])->name('orders.index');
 });
 
 
@@ -144,6 +156,7 @@ Route::middleware(['auth'])
 
 
 // ======================================================
+// ======================================================
 // ESPACE CLIENT
 // ======================================================
 Route::prefix('client')->name('client.')->group(function () {
@@ -154,19 +167,23 @@ Route::prefix('client')->name('client.')->group(function () {
     Route::get('/categories', [ClientCategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/{id}', [ClientCategoryController::class, 'show'])->name('categories.show');
 
-    // Panier en session
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
-    Route::put('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    // Panier en session (préfixes simplifiés car déjà dans le groupe client)
+    Route::prefix('cart')->name('cart.')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('index');
+        Route::post('/add/{product}', [CartController::class, 'add'])->name('add');
+        Route::patch('/update/{productId}', [CartController::class, 'update'])->name('update');
+        Route::delete('/remove/{productId}', [CartController::class, 'remove'])->name('remove');
+        Route::post('/clear', [CartController::class, 'clear'])->name('clear');
+    });
 
     // Commande (Utilisateur connecté)
     Route::middleware(['auth'])->group(function () {
         Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
         Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-        Route::get('/orders', [ClientOrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}', [ClientOrderController::class, 'show'])->name('orders.show');
+        // Suivi et détail des commandes
+    Route::get('/orders', [ClientOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [ClientOrderController::class, 'show'])->name('orders.show');
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
     });
 });
 

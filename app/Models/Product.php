@@ -7,14 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'name',
-        'price',
-        'stock',
-        'image',
-        'category_id',
-    ];
+    'name',
+    'description',
+    'price',
+    'stock',
+    'category_id',
+    'image',
+    'external_source',
+    'external_ref',
+    'size',
+    'color',
+    'gender',
+];
 
-
+public function comments()
+    {
+        return $this->hasMany(Comment::class)->latest(); // Pour avoir les plus récents en premier
+    }
     public function category()
     {
         return $this->belongsTo(

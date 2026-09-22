@@ -1,285 +1,80 @@
 
 
-<?php $__env->startSection('title', 'Modifier un produit'); ?>
-
-<?php $__env->startSection('page-title', 'Modifier un produit'); ?>
-
 <?php $__env->startSection('content'); ?>
-
-<div class="card shadow-sm border-0">
-
-    <div class="card-body">
-
-        <h4 class="mb-4">
-            <i class="bi bi-pencil-square text-warning"></i>
-            Modifier le produit
-        </h4>
-
-        <form action="<?php echo e(route('admin.products.update', $product)); ?>"
-              method="POST"
-              enctype="multipart/form-data">
-
-            <?php echo csrf_field(); ?>
-            <?php echo method_field('PUT'); ?>
-
-            <div class="row g-3">
-
-                
-                <div class="col-md-6">
-
-                    <label class="form-label">
-                        Nom du produit
-                    </label>
-
-                    <input type="text"
-                           name="name"
-                           class="form-control <?php $__errorArgs = ['name'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                           value="<?php echo e(old('name', $product->name)); ?>"
-                           required>
-
-                    <?php $__errorArgs = ['name'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <div class="invalid-feedback">
-                            <?php echo e($message); ?>
-
-                        </div>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-
-                </div>
-
-
-                
-                <div class="col-md-6">
-
-                    <label class="form-label">
-                        Catégorie
-                    </label>
-
-                    <select name="category_id"
-                            class="form-select <?php $__errorArgs = ['category_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-
-                        <option value="">
-                            -- Choisir une catégorie --
-                        </option>
-
-                        <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-
-                            <option value="<?php echo e($category->id); ?>"
-                                <?php echo e(old('category_id', $product->category_id) == $category->id ? 'selected' : ''); ?>>
-
-                                <?php echo e($category->name); ?>
-
-
-                            </option>
-
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
-                    </select>
-
-                    <?php $__errorArgs = ['category_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <div class="invalid-feedback">
-                            <?php echo e($message); ?>
-
-                        </div>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-
-                </div>
-
-
-                
-                <div class="col-md-6">
-
-                    <label class="form-label">
-                        Prix (FCFA)
-                    </label>
-
-                    <input type="number"
-                           name="price"
-                           class="form-control <?php $__errorArgs = ['price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                           min="0"
-                           step="1"
-                           value="<?php echo e(old('price', $product->price)); ?>"
-                           required>
-
-                    <?php $__errorArgs = ['price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <div class="invalid-feedback">
-                            <?php echo e($message); ?>
-
-                        </div>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-
-                </div>
-
-
-                
-                <div class="col-md-6">
-
-                    <label class="form-label">
-                        Stock
-                    </label>
-
-                    <input type="number"
-                           name="stock"
-                           class="form-control <?php $__errorArgs = ['stock'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                           min="0"
-                           value="<?php echo e(old('stock', $product->stock)); ?>"
-                           required>
-
-                    <?php $__errorArgs = ['stock'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <div class="invalid-feedback">
-                            <?php echo e($message); ?>
-
-                        </div>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-
-                </div>
-
-
-                
-                <div class="col-12">
-
-                    <label class="form-label">
-                        Description
-                    </label>
-
-                    <textarea name="description"
-                              class="form-control"
-                              rows="4"><?php echo e(old('description', $product->description)); ?></textarea>
-
-                </div>
-
-
-                
-                <div class="col-md-6">
-
-                    <label class="form-label">
-                        Image actuelle
-                    </label>
-
-                    <?php if($product->image && file_exists(public_path('images/products/' . $product->image))): ?>
-
-                        <div>
-                            <img src="<?php echo e(asset('images/products/' . $product->image)); ?>"
-                                 alt="<?php echo e($product->name); ?>"
-                                 width="150"
-                                 height="150"
-                                 class="rounded img-thumbnail"
-                                 style="object-fit: cover;">
-                        </div>
-
-                    <?php else: ?>
-
-                        <p class="text-muted">
-                            Aucune image.
-                        </p>
-
-                    <?php endif; ?>
-
-                </div>
-
-
-                
-                <div class="col-md-6">
-
-                    <label class="form-label">
-                        Remplacer l'image
-                    </label>
-
-                    <input type="file"
-                           name="image"
-                           class="form-control"
-                           accept="image/*">
-
-                    <small class="text-muted">
-                        JPG, JPEG, PNG ou WEBP — maximum 2 Mo.
-                    </small>
-
-                </div>
-
-            </div>
-
-
-            
-            <div class="mt-4">
-
-                <button type="submit"
-                        class="btn btn-warning">
-
-                    <i class="bi bi-check-lg"></i>
-                    Enregistrer les modifications
-
-                </button>
-
-                <a href="<?php echo e(route('admin.products.index')); ?>"
-                   class="btn btn-secondary">
-
-                    <i class="bi bi-arrow-left"></i>
-                    Retour
-
-                </a>
-
-            </div>
-
-        </form>
-
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Modifier le produit : <?php echo e($product->name); ?></h2>
+        <a href="<?php echo e(route('admin.products.index')); ?>" class="btn btn-secondary">Retour</a>
     </div>
 
-</div>
+    <form action="<?php echo e(route('admin.products.update', $product->id)); ?>" method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
 
+        <div class="mb-3">
+            <label class="form-label">Nom du produit</label>
+            <input type="text" name="name" class="form-control" value="<?php echo e(old('name', $product->name)); ?>" required>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Prix (FCFA)</label>
+                <input type="number" step="0.01" name="price" class="form-control" value="<?php echo e(old('price', $product->price)); ?>" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Stock</label>
+                <input type="number" name="stock" class="form-control" value="<?php echo e(old('stock', $product->stock)); ?>" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Catégorie</label>
+                <select name="category_id" class="form-select" required>
+                    <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($category->id); ?>" <?php echo e($product->category_id == $category->id ? 'selected' : ''); ?>>
+                            <?php echo e($category->name); ?>
+
+                        </option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Sexe / Public</label>
+                <select name="gender" class="form-select">
+                    <option value="mixte" <?php echo e($product->gender == 'mixte' ? 'selected' : ''); ?>>Mixte / Unisexe</option>
+                    <option value="homme" <?php echo e($product->gender == 'homme' ? 'selected' : ''); ?>>Homme</option>
+                    <option value="femme" <?php echo e($product->gender == 'femme' ? 'selected' : ''); ?>>Femme</option>
+                    <option value="enfant" <?php echo e($product->gender == 'enfant' ? 'selected' : ''); ?>>Enfant</option>
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Taille</label>
+                <input type="text" name="size" class="form-control" value="<?php echo e(old('size', $product->size)); ?>">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Couleur</label>
+                <input type="text" name="color" class="form-control" value="<?php echo e(old('color', $product->color)); ?>">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Changer l'image (optionnel)</label>
+            <input type="file" name="image" class="form-control" accept="image/*">
+            <?php if($product->image): ?>
+                <div class="mt-2">
+                    <img src="<?php echo e(asset('images/products/' . $product->image)); ?>" alt="Image actuelle" width="80" class="rounded">
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" rows="3" class="form-control"><?php echo e(old('description', $product->description)); ?></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success">Mettre à jour le produit</button>
+    </form>
+</div>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Ndogaye Béye !!!\Documents\memoir\sen_distribution\resources\views/admin/products/edit.blade.php ENDPATH**/ ?>

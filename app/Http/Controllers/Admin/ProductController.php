@@ -25,10 +25,8 @@ class ProductController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view(
-            'admin.products.index',
-            compact('products', 'search')
-        );
+       return view('admin.products.index', compact('products'));
+        
     }
 
     /**
@@ -51,35 +49,45 @@ class ProductController extends Controller
 {
     // 1. Validation des champs
     $request->validate([
-        'name' => 'required|string|max:255',
-        'price' => 'required|numeric',
-        'stock' => 'required|integer',
-        'description' => 'nullable|string',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        'name'            => 'required|string|max:255',
+        'price'           => 'required|numeric|min:0',
+        'stock'           => 'required|integer|min:0',
+        'category_id'     => 'required|exists:categories,id',
+        'size'            => 'nullable|string|max:50',
+        'color'           => 'nullable|string|max:50',
+        'gender'          => 'required|in:homme,femme,mixte,enfant',
+        'image'           => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'external_source' => 'nullable|string|max:100',
+        'external_ref'    => 'nullable|string|max:255',
+        'description'     => 'nullable|string',
+        'image_url' => 'nullable|url',
     ]);
 
-    // 2. Instanciation obligatoire du modèle Product
-    $product = new Product();
-    $product->name = $request->name;
-    $product->description = $request->description;
-    $product->price = $request->price;
-    $product->stock = $request->stock;
-    $product->category_id = $request->category_id ?? null;
+    // 2. Traitement et upload de l'image (avant la création)
+    $imagePath = null;
 
-    // 3. Gestion du téléversement de l'image
+    // Si l'administrateur téléverse un fichier local
     if ($request->hasFile('image')) {
-        $file = $request->file('image');
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        
-        // Sauvegarde dans public/uploads/products
-        $file->move(public_path('images/products'), $filename);
-        
-        // Affectation du nom de fichier à l'objet instancié
-        $product->image = $filename;
+        $imagePath = $request->file('image')->store('products', 'public');
+    } 
+    // Sinon, si une URL Google/externe est renseignée
+    elseif ($request->filled('image_url')) {
+        $imagePath = $request->image_url;
     }
-
-    // 4. Sauvegarde en base de données
-    $product->save();
+    // 3. Enregistrement unique en base de données
+    Product::create([
+        'name'            => $request->name,
+        'description'     => $request->description,
+        'price'           => $request->price,
+        'stock'           => $request->stock,
+        'category_id'     => $request->category_id,
+        'external_source' => $request->external_source,
+        'external_ref'    => $request->external_ref,
+        'size'            => $request->size,
+        'color'           => $request->color,
+        'gender'          => $request->gender,
+       'image'       => $imagePath,// Reçoit le nom du fichier ou null
+    ]);
 
     return redirect()->route('admin.products.index')->with('success', 'Produit créé avec succès !');
 }
@@ -87,88 +95,71 @@ class ProductController extends Controller
     /**
      * Formulaire de modification
      */
-    public function edit(Product $product)
-    {
-        $categories = Category::orderBy('name')->get();
+   // Afficher le formulaire de modification
+public function edit(Product $product)
+{
+    $categories = Category::all();
+    return view('admin.products.edit', compact('product', 'categories'));
+}
 
-        return view(
-            'admin.products.edit',
-            compact('product', 'categories')
-        );
-    }
-
-    /**
-     * Modifier un produit
-     */
-   public function update(Request $request, Product $product)
+// Mettre à jour le produit
+public function update(Request $request, Product $product)
 {
     $request->validate([
-        'name' => 'required|string|max:255',
-        'price' => 'required|numeric',
-        'stock' => 'required|integer',
-        'category_id' => 'nullable|exists:categories,id',
-        'description' => 'nullable|string',
-        'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+        'name'            => 'required|string|max:255',
+        'price'           => 'required|numeric|min:0',
+        'stock'           => 'required|integer|min:0',
+        'category_id'     => 'required|exists:categories,id',
+        'size'            => 'nullable|string|max:50',
+        'color'           => 'nullable|string|max:50',
+        'gender'          => 'required|in:homme,femme,mixte,enfant',
+        'image'           => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'external_source' => 'nullable|string|max:100',
+        'external_ref'    => 'nullable|string|max:255',
+        'description'     => 'nullable|string',
+        'image_url' => 'nullable|url',
     ]);
 
-    // Mise à jour des données textuelles
-    $product->name = $request->name;
-    $product->price = $request->price;
-    $product->stock = $request->stock;
-    $product->category_id = $request->category_id;
-    $product->description = $request->description;
-
-    // Gestion du fichier image
+    // Gestion de l'image si une nouvelle image est téléversée
     if ($request->hasFile('image')) {
-        // Supprimer l'ancienne image si elle existe dans le dossier
+        // Supprimer l'ancienne image si elle existe
         if ($product->image && file_exists(public_path('images/products/' . $product->image))) {
             unlink(public_path('images/products/' . $product->image));
         }
 
-        $image = $request->file('image');
-        $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-        
-        // Déplacer l'image vers le dossier public
-        $image->move(public_path('images/products'), $imageName);
-
-        // Assigner le nom de fichier généré au champ
-        $product->image = $imageName;
+        $file = $request->file('image');
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('images/products'), $filename);
+        $product->image = $filename;
     }
 
-    $product->save();
+    $product->update([
+        'name'            => $request->name,
+        'description'     => $request->description,
+        'price'           => $request->price,
+        'stock'           => $request->stock,
+        'category_id'     => $request->category_id,
+        'external_source' => $request->external_source,
+        'external_ref'    => $request->external_ref,
+        'size'            => $request->size,
+        'color'           => $request->color,
+        'gender'          => $request->gender,
+        'image'           => $product->image,
+    ]);
 
-    return redirect()->route('admin.products.index')->with('success', 'Produit modifié avec succès.');
+    return redirect()->route('admin.products.index')->with('success', 'Produit mis à jour avec succès !');
 }
 
-    /**
-     * Supprimer un produit
-     */
-    public function destroy(Product $product)
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | SUPPRIMER L'IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        if ($product->image) {
-            Storage::disk('public')
-                ->delete($product->image);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | SUPPRIMER LE PRODUIT
-        |--------------------------------------------------------------------------
-        */
-
-        $product->delete();
-
-        return redirect()
-            ->route('admin.products.index')
-            ->with(
-                'success',
-                'Produit supprimé avec succès.'
-            );
+// Supprimer un produit
+public function destroy(Product $product)
+{
+    if ($product->image && file_exists(public_path('images/products/' . $product->image))) {
+        unlink(public_path('images/products/' . $product->image));
     }
+
+    $product->delete();
+
+    return redirect()->route('admin.products.index')->with('success', 'Produit supprimé avec succès !');
+}
+   
 }
