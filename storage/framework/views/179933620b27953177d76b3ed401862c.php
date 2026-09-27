@@ -251,26 +251,61 @@
         
         
         <div class="col-lg-4">
-            <div class="section-box">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h5 class="fw-bold text-dark m-0">
-                        <i class="bi bi-grid-fill text-primary me-2"></i> Catégories
-                    </h5>
-                    <a href="<?php echo e(route('client.products.index')); ?>" class="text-decoration-none small fw-bold text-primary">Tout voir</a>
-                </div>
+            <div class="card border-0 shadow-sm rounded-3 p-3 position-relative">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-grid-fill text-primary me-2"></i>Catégories
+        </h5>
+        <a href="<?php echo e(route('client.categories.index')); ?>" class="text-decoration-none small text-muted">Tout voir</a>
+    </div>
 
-                <div class="d-flex flex-column gap-2">
-                    <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <a href="<?php echo e(route('client.products.index', ['category' => $category->id])); ?>" class="cat-card-item">
-                            <div class="cat-icon-circle shadow-sm">
-                                <i class="bi bi-box-seam"></i>
-                            </div>
-                            <span class="fw-bold text-truncate fs-6"><?php echo e($category->name); ?></span>
-                            <i class="bi bi-chevron-right ms-auto opacity-50"></i>
-                        </a>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </div>
+    <?php
+        $parentCategories = \App\Models\Category::whereNull('parent_id')->with('children')->get();
+    ?>
+
+    <div class="list-group list-group-flush position-static">
+        <?php $__empty_1 = true; $__currentLoopData = $parentCategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $parent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <div class="category-menu-item">
+                <a href="<?php echo e(route('client.products.index', ['category' => $parent->slug])); ?>" 
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 rounded-2 py-2 mb-1">
+                    <span class="fw-semibold">
+                        <i class="bi bi-folder2-open text-primary me-2"></i><?php echo e($parent->name); ?>
+
+                    </span>
+                    <?php if($parent->children->isNotEmpty()): ?>
+                        <i class="bi bi-chevron-right text-muted small"></i>
+                    <?php endif; ?>
+                </a>
+
+                
+                <?php if($parent->children->isNotEmpty()): ?>
+                    <div class="category-dropdown-panel bg-white shadow-lg border rounded-3 p-3">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                            <h6 class="fw-bold text-uppercase text-primary mb-0"><?php echo e($parent->name); ?></h6>
+                            <a href="<?php echo e(route('client.products.index', ['category' => $parent->slug])); ?>" class="small text-decoration-none fw-bold">
+                                Voir tout <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+
+                        <div class="row g-2">
+                            <?php $__currentLoopData = $parent->children; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="col-6">
+                                    <a href="<?php echo e(route('client.home', ['category' => $parent->id])); ?>"
+                                       class="subcat-link d-flex align-items-center p-2 rounded text-decoration-none text-dark bg-light">
+                                        <i class="bi bi-tag-fill text-primary me-2 fs-6"></i>
+                                        <span class="small fw-semibold text-truncate"><?php echo e($child->name); ?></span>
+                                    </a>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <p class="text-muted small">Aucune catégorie disponible</p>
+        <?php endif; ?>
+    </div>
+</div>
         </div>
 
         

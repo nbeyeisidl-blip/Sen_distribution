@@ -109,6 +109,117 @@
             height: auto;
         }
     }
+
+
+
+    /* Adaptation responsive 5 colonnes sur grand écran */
+@media (min-width: 1200px) {
+    .col-xl-2-4 {
+        flex: 0 0 auto;
+        width: 20%;
+    }
+}
+
+/* Zone d'image fixe */
+.product-image-container {
+    height: 180px;
+    width: 100%;
+    background-color: #f8f9fa; /* Fond léger pour combler les bords */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 5px;
+}
+
+.product-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain; /* Ajuste l'image entière sans la couper */
+    transition: transform 0.3s ease;
+}
+
+/* Animation au survol */
+.product-card {
+    transition: transform 0.2s ease, shadow 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.product-card:hover .product-img {
+    transform: scale(1.05);
+}
+
+/* Titre limité sur 2 lignes */
+.product-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.extra-small {
+    font-size: 0.75rem;
+}
+
+.style-cat {
+    max-width: 100%;
+}
+
+
+/* Conteneur d'image avec effet d'ombre et transition */
+.product-image-container {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Style de l'image de base */
+.product-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+/* Effet au survol de la carte */
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Zoom fluide et légère luminosité sur l'image */
+.product-card:hover .product-img {
+    transform: scale(1.08);
+    filter: brightness(1.03);
+}
+
+/* Effet d'apparition douce du bouton Vendre au survol */
+.product-card .btn-vendre {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.product-card:hover .btn-vendre {
+    background-color: #0d6efd;
+    color: #fff;
+    transform: scale(1.02);
+}
     </style>
 
 </head>

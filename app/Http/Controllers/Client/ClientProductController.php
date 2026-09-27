@@ -22,21 +22,32 @@ class ClientProductController extends Controller
         }
 
         // Catégorie
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+       $query = Product::where('stock', '>', 0);
+
+        // On prend 'category_id' en priorité, sinon 'category'
+        $catInput = $request->input('category_id') ?? $request->input('category');
+
+        if (!empty($catInput)) {
+            // Recherche la catégorie par son ID, son Slug ou son Nom ("Femme", "Homme", etc.)
+            $category = Category::where('id', $catInput)
+                        ->orWhere('slug', $catInput)
+                        ->orWhere('name', $catInput)
+                        ->first();
+
+            if ($category) {
+                // Récupère l'ID de la catégorie principale + les IDs de ses sous-catégories
+                $childrenIds = $category->children()->pluck('id')->toArray();
+                $allCategoryIds = array_merge([$category->id], $childrenIds);
+
+                // Applique le filtre sur la base de données
+                $query->whereIn('category_id', $allCategoryIds);
+            }
         }
 
-        $products = $query
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
+        $products = $query->latest()->paginate(12);
+        $categories = Category::whereNull('parent_id')->with('children')->get();
 
-        $categories = Category::orderBy('name')->get();
-
-        return view(
-            'client.products.index',
-            compact('products', 'categories')
-        );
+        return view('client.products.index', compact('products', 'categories'));
     }
 
 

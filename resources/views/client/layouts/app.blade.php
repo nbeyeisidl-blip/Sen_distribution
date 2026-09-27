@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>
         @yield('title', 'SEN DISTRIBUTION')
@@ -92,44 +92,127 @@
             margin-top: 60px;
         }
 
-
         /* 1. Gestion globale pour mobile */
-    html, body {
-        max-width: 100%;
-        overflow-x: hidden; /* Empêche le défilement horizontal indésirable de la page */
-    }
-
-    /* 2. Adaptation des tableaux sur tous les téléphones */
-    .table-responsive {
-        width: 100%;
-        margin-bottom: 1rem;
-        overflow-y: hidden;
-        -ms-overflow-style: -ms-autohide-scrollbar;
-        -webkit-overflow-scrolling: touch; /* Défilement fluide sur iOS / iPhone */
-    }
-
-    /* 3. Adaptation dynamique des cartes et formulaires */
-    @media (max-width: 768px) {
-        .container, .container-fluid {
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-
-        /* Ajustement de la taille du texte et des boutons sur petit écran */
-        h1, .h1 { font-size: 1.5rem; }
-        h2, .h2 { font-size: 1.3rem; }
-        
-        .btn {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.9rem;
-        }
-        
-        /* Ajustement des images pour qu'elles ne dépassent jamais */
-        img {
+        html, body {
             max-width: 100%;
-            height: auto;
+            overflow-x: hidden;
         }
-    }
+
+        /* 2. Adaptation des tableaux sur tous les téléphones */
+        .table-responsive {
+            width: 100%;
+            margin-bottom: 1rem;
+            overflow-y: hidden;
+            -ms-overflow-style: -ms-autohide-scrollbar;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 3. Style Menu Catégories Imbriquées (Style Jumia) */
+        @media (min-width: 992px) {
+            .dropdown-menu .dropend:hover > .dropdown-menu {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 100%;
+                margin-top: -6px;
+            }
+        }
+
+        /* 4. Adaptation dynamique des cartes et formulaires */
+        @media (max-width: 768px) {
+            .container, .container-fluid {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            h1, .h1 { font-size: 1.5rem; }
+            h2, .h2 { font-size: 1.3rem; }
+            
+            .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+
+        /* Alignement du conteneur parent */
+.category-item {
+    position: relative;
+}
+
+/* Style du panneau flottant à la Jumia */
+.jumia-megamenu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%; /* S'affiche exactement à droite du bloc principal */
+    width: 320px;
+    min-height: 100%;
+    z-index: 1050;
+    margin-left: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Affichage dynamique au survol */
+.category-item:hover .jumia-megamenu {
+    display: block;
+}
+
+/* Effet visuel au survol du bouton principal */
+.category-item:hover > a {
+    background-color: #e2e8f0 !important;
+    color: #2563eb !important;
+}
+
+.hover-bg-light:hover {
+    background-color: #f8f9fa;
+}
+
+
+/* Style des boutons d'onglet à gauche */
+.custom-jumia-tabs .nav-link {
+    color: #333;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.custom-jumia-tabs .nav-link:hover {
+    background-color: #f1f5f9;
+    color: #0d6efd;
+}
+
+/* Style de la catégorie active sélectionnée */
+.custom-jumia-tabs .nav-link.active {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+    font-weight: bold;
+    border-color: #b6d4fe;
+}
+
+.custom-jumia-tabs .nav-link.active .bi-chevron-right {
+    color: #0d6efd !important;
+}
+
+/* Boîte des images de sous-catégories */
+.jumia-img-box {
+    height: 90px;
+    transition: transform 0.2s ease;
+}
+
+.jumia-subcat-card:hover .jumia-img-box {
+    transform: translateY(-3px);
+    background-color: #e2e8f0 !important;
+}
+
+.jumia-subcat-card:hover span {
+    color: #0d6efd !important;
+}
     </style>
 
     @stack('styles')
@@ -153,16 +236,52 @@
 
         <div class="collapse navbar-collapse" id="navbarClient">
 
-            <ul class="navbar-nav mx-auto">
+            <ul class="navbar-nav mx-auto align-items-center">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('client.home') }}">Accueil</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('client.products.index') }}">Produits</a>
                 </li>
-                 <li class="mb-1">
-                        <a  class="nav-link" href="{{ route('client.categories.index') }}" class="text-white-50 text-decoration-none">Categories</a>
-                    </li>
+
+                <!-- Menu Déroulant Catégories & Sous-Catégories (Style Jumia) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Catégories
+                    </a>
+                    <ul class="dropdown-menu shadow" aria-labelledby="categoriesDropdown">
+                        @php
+                            // Récupération dynamique des catégories principales et leurs enfants
+                            $categoriesMenu = \App\Models\Category::whereNull('parent_id')->with('children')->get();
+                        @endphp
+
+                        @forelse($categoriesMenu as $parent)
+                            <li class="dropend">
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('client.products.index', ['category' => $parent->slug]) }}">
+                                    <span>{{ $parent->name }}</span>
+                                    @if($parent->children->isNotEmpty())
+                                        <i class="bi bi-chevron-right ms-2 fs-7 text-muted"></i>
+                                    @endif
+                                </a>
+
+                                {{-- Affichage des Sous-catégories rattachées --}}
+                                @if($parent->children->isNotEmpty())
+                                    <ul class="dropdown-menu shadow">
+                                        @foreach($parent->children as $child)
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('client.products.index', ['category' => $child->slug]) }}">
+                                                    {{ $child->name }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @empty
+                            <li><span class="dropdown-item text-muted">Aucune catégorie</span></li>
+                        @endforelse
+                    </ul>
+                </li>
             </ul>
 
             <div class="d-flex align-items-center gap-3">
@@ -183,47 +302,47 @@
                 </a>
 
                 <!-- Espace Compte / Auth Unifiée -->
-@auth
-    <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle btn-sm fw-semibold" type="button" data-bs-toggle="dropdown">
-            <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name ?? 'Mon Compte' }}
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            
-            {{-- Lien visible uniquement pour les administrateurs --}}
-            @if(Auth::user()->role === 'admin')
-                <li>
-                    <a class="dropdown-item fw-bold text-primary" href="{{ route('admin.dashboard') }}">
-                        <i class="bi bi-speedometer2 me-2"></i>Tableau de bord Admin
-                    </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-            @elseif(Auth::user()->role === 'cashier' || Auth::user()->role === 'caissier')
-                <li>
-                    <a class="dropdown-item fw-bold text-success" href="{{ route('cashier.dashboard') }}">
-                        <i class="bi bi-calculator me-2"></i>Espace Caissier
-                    </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-            @endif
+                @auth
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle btn-sm fw-semibold" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name ?? 'Mon Compte' }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            
+                            {{-- Lien visible uniquement pour les administrateurs --}}
+                            @if(Auth::user()->role === 'admin')
+                                <li>
+                                    <a class="dropdown-item fw-bold text-primary" href="{{ route('admin.dashboard') }}">
+                                        <i class="bi bi-speedometer2 me-2"></i>Tableau de bord Admin
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                            @elseif(Auth::user()->role === 'cashier' || Auth::user()->role === 'caissier')
+                                <li>
+                                    <a class="dropdown-item fw-bold text-success" href="{{ route('cashier.dashboard') }}">
+                                        <i class="bi bi-calculator me-2"></i>Espace Caissier
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                            @endif
 
-            <li>
-                <a class="dropdown-item" href="{{ route('client.orders.index') }}">
-                    <i class="bi bi-bag-check me-2"></i>Mes Commandes
-                </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="dropdown-item text-danger">
-                        <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
-                    </button>
-                </form>
-            </li>
-        </ul>
-    </div>
-@endauth
+                            <li>
+                                <a class="dropdown-item" href="{{ route('client.orders.index') }}">
+                                    <i class="bi bi-bag-check me-2"></i>Mes Commandes
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                @endauth
             </div>
 
         </div>
@@ -296,10 +415,9 @@
                     <li class="mb-1">
                         <a href="{{ route('client.products.index') }}" class="text-white-50 text-decoration-none">Produits</a>
                     </li>
-                     <li class="mb-1">
-                        <a href="{{ route('client.categories.index') }}" class="text-white-50 text-decoration-none">Categories</a>
+                    <li class="mb-1">
+                        <a href="{{ route('client.categories.index') }}" class="text-white-50 text-decoration-none">Catégories</a>
                     </li>
-     
                 </ul>
             </div>
 

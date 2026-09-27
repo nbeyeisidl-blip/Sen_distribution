@@ -43,8 +43,9 @@ class SaleController extends Controller
 {
     // Validation souple pour s'adapter au formulaire
     $request->validate([
-        'client_id' => 'nullable|exists:users,id',
-        'products'  => 'required|array|min:1',
+        'client_id' => 'nullable|exists:clients,id',
+        'payment_method' => 'required|string',
+        // autres validations...
     ]);
 
     DB::transaction(function () use ($request) {
@@ -73,12 +74,14 @@ class SaleController extends Controller
 
         // 2. Création de la vente avec le montant TOTAL réel
         // 2. Création de la vente avec le montant TOTAL réel
-$sale = Sale::create([
-    'user_id'    => auth()->id(), // Remplacer user_id par caissier_id
-    'client_id'      => $request->client_id ?? null,
-    'total'   => $totalAmount,
-    'payment_method' => $request->payment_method ?? 'espèces',
-]);
+// Enregistrement de la vente
+    $sale = Sale::create([
+        'client_id' => $request->client_id ?? null, // enregistre null si aucun client n'est sélectionné
+        'user_id' => auth()->id(),
+        'total' => $total,
+        'payment_method' => $request->payment_method,
+        // ...
+    ]);
 
         // 3. Enregistrement des lignes de vente
         foreach ($itemsToInsert as $line) {

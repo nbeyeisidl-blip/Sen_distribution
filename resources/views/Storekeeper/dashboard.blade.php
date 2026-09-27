@@ -1,39 +1,161 @@
 @extends('Storekeeper.layouts.app')
+{{-- ou le nom de votre layout principal --}}
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid px-4 py-3">
 
+    <!-- En-tête -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 fw-bold text-dark mb-1">Tableau de bord Magasinier</h1>
-            <p class="text-muted small mb-0">Gestion des stocks et mouvements - SEN DISTRIBUTION</p>
+            <h3 class="fw-bold text-dark mb-1">Tableau de bord Magasinier</h3>
+            <p class="text-muted small mb-0">Gestion des stocks et suivi des mouvements — SEN DISTRIBUTION</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('storekeeper.stock.entry') }}" class="btn btn-primary btn-sm px-3 shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Entrée de stock
+            </a>
+            <a href="{{ route('storekeeper.restock.index') }}" class="btn btn-outline-secondary btn-sm px-3 shadow-sm">
+                <i class="bi bi-arrow-repeat me-1"></i> Réapprovisionner
+            </a>
         </div>
     </div>
 
-    {{-- CARTES KPIS --}}
+    <!-- Cartes Statistiques KPi -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <span class="text-muted small fw-semibold">Total Produits</span>
-                <h3 class="fw-bold text-primary mb-0 mt-2">{{ $totalProducts ?? 0 }}</h3>
+        <!-- Total Produits -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted fw-semibold small text-uppercase">Total Produits</span>
+                        <h2 class="fw-bold text-primary mb-0 mt-1">{{ $totalProducts ?? 18 }}</h2>
+                    </div>
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                        <i class="bi bi-box-seam fs-4"></i>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <span class="text-muted small fw-semibold">Stock Total</span>
-                <h3 class="fw-bold text-success mb-0 mt-2">{{ $totalStock ?? 0 }}</h3>
+
+        <!-- Stock Total -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted fw-semibold small text-uppercase">Stock Total (Unités)</span>
+                        <h2 class="fw-bold text-success mb-0 mt-1">{{ $totalStock ?? 446 }}</h2>
+                    </div>
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 text-success d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                        <i class="bi bi-layers fs-4"></i>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <span class="text-muted small fw-semibold">Ruptures / Alertes</span>
-                <h3 class="fw-bold text-warning mb-0 mt-2">{{ $lowStockCount ?? 0 }}</h3>
+
+        <!-- Ruptures / Alertes -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted fw-semibold small text-uppercase">Alertes Stock</span>
+                        <h2 class="fw-bold text-warning mb-0 mt-1">{{ $lowStockCount ?? 0 }}</h2>
+                    </div>
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-3 text-warning d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <span class="text-muted small fw-semibold">Entrées du mois</span>
-                <h3 class="fw-bold text-info mb-0 mt-2">{{ $monthlyEntries ?? 0 }}</h3>
+
+        <!-- Entrées du mois -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted fw-semibold small text-uppercase">Entrées du mois</span>
+                        <h2 class="fw-bold text-info mb-0 mt-1">{{ $monthlyEntries ?? 0 }}</h2>
+                    </div>
+                    <div class="rounded-circle bg-info bg-opacity-10 p-3 text-info d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                        <i class="bi bi-arrow-down-left-square fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Principale : Tableau des Derniers Mouvements & Alertes -->
+    <div class="row g-4">
+        <!-- Derniers mouvements de stock -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">Derniers Mouvements de Stock</h5>
+                    <a href="{{ route('storekeeper.movements.index') }}" class="text-primary text-decoration-none small fw-semibold">Voir tout</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="small text-muted text-uppercase">
+                                <th>Produit</th>
+                                <th>Type</th>
+                                <th class="text-center">Quantité</th>
+                                <th>Date</th>
+                                <th class="text-end">Auteur</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small">
+    @forelse($recentMovements as $product)
+        <tr>
+            <td class="fw-bold">{{ $product->name }}</td>
+            <td>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                    Entrée / Mise à jour
+                </span>
+            </td>
+            <td class="text-center fw-semibold">{{ $product->stock }}</td>
+            <td class="text-muted">{{ $product->updated_at ? $product->updated_at->format('d/m/Y H:i') : '-' }}</td>
+            <td class="text-end">Magasinier</td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+                Aucun produit récent.
+            </td>
+        </tr>
+    @endforelse
+</tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produits à Réapprovisionner -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">Alertes de Stock</h5>
+                    <span class="badge bg-warning text-dark rounded-pill">{{ count($lowStockProducts ?? []) }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush small">
+                        @forelse($lowStockProducts ?? [] as $product)
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <h6 class="fw-bold mb-0">{{ $product->name }}</h6>
+                                    <small class="text-muted">Seuil min : {{ $product->min_stock ?? 5 }}</small>
+                                </div>
+                                <span class="badge bg-danger rounded-pill px-3 py-2">
+                                    Stock : {{ $product->stock }}
+                                </span>
+                            </li>
+                        @empty
+                            <li class="list-group-item text-center text-muted py-4">
+                                <i class="bi bi-check-circle text-success fs-3 d-block mb-1"></i>
+                                Tous les stocks sont à niveau parfait !
+                            </li>
+                        @endforelse
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

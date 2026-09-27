@@ -84,30 +84,48 @@
                                     <th class="text-end" style="width: 140px;">Montant Total</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @forelse($order->items as $item)
-                                    <tr>
-                                        <td>
-                                            <div class="fw-bold text-dark small">{{ $item->product->name ?? $item->product->nom ?? 'Produit' }}</div>
-                                        </td>
-                                        <td class="text-end small">
-                                            {{ number_format($item->price, 0, ',', ' ') }} FCFA
-                                        </td>
-                                        <td class="text-center fw-semibold small">
-                                            {{ $item->quantity }}
-                                        </td>
-                                        <td class="text-end fw-bold text-dark small">
-                                            {{ number_format($item->price * $item->quantity, 0, ',', ' ') }} FCFA
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center py-3 text-muted">
-                                            Aucun article associé à cette commande.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
+                   <tbody class="small">
+    @php
+        // Récupération dynamique de la collection d'articles
+        $items = collect();
+        
+        if (!empty($order->items) && $order->items->count() > 0) {
+            $items = $order->items;
+        } elseif (!empty($order->saleItems) && $order->saleItems->count() > 0) {
+            $items = $order->saleItems;
+        } elseif (!empty($order->details) && $order->details->count() > 0) {
+            $items = $order->details;
+        }
+    @endphp
+
+    @forelse($items as $item)
+        <tr>
+            <td>
+                {{ $item->product->name ?? $item->product->nom ?? $item->designation ?? $item->product_name ?? 'Produit #' . ($item->product_id ?? $item->id) }}
+            </td>
+            <td class="text-center">
+                {{ number_format($item->unit_price ?? $item->price ?? $item->prix_unitaire ?? 0, 0, ',', ' ') }} FCFA
+            </td>
+            <td class="text-center">
+                {{ $item->quantity ?? $item->qte ?? 1 }}
+            </td>
+            <td class="text-end fw-bold">
+                @php
+                    $qty = $item->quantity ?? $item->qte ?? 1;
+                    $price = $item->unit_price ?? $item->price ?? $item->prix_unitaire ?? 0;
+                    $subtotal = $item->total ?? $item->subtotal ?? ($qty * $price);
+                @endphp
+                {{ number_format($subtotal, 0, ',', ' ') }} FCFA
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="4" class="text-center text-muted py-3">
+                Aucun article trouvé.
+            </td>
+        </tr>
+    @endforelse
+</tbody>
                         </table>
                     </div>
 

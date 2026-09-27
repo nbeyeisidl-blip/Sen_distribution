@@ -6,19 +6,54 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Fournisseur;
 use Illuminate\Http\Request;
+use App\Models\StockMovement; // <-- Ajoutez cette ligne
+use Carbon\Carbon;
 
 class StorekeeperController extends Controller
 {
     // Tableau de bord Magasinier
-    public function dashboard()
+   public function dashboard()
     {
+        // 1. Statistiques Produits & Stocks
         $totalProducts = Product::count();
         $totalStock = Product::sum('stock');
         $lowStockCount = Product::where('stock', '<=', 5)->count();
 
-        return view('Storekeeper.dashboard', compact('totalProducts', 'totalStock', 'lowStockCount'));
-    }
+        // 2. Traitement sécurisé des mouvements
+        $monthlyEntries = 0;
+        $recentMovements = collect();
 
+        // Vérifie si un modèle StockMovement ou Movement existe dans App\Models
+        $movementModel = class_exists('\App\Models\StockMovement') 
+            ? '\App\Models\StockMovement' 
+            : (class_exists('\App\Models\Movement') ? '\App\Models\Movement' : null);
+
+        if ($movementModel) {
+            $monthlyEntries = $movementModel::where('type', 'IN')
+                ->whereMonth('created_at', Carbon::now()->month)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->sum('quantity');
+
+            $recentMovements = $movementModel::with(['product', 'user'])
+                ->latest()
+                ->take(5)
+                ->get();
+        }
+
+        // 3. Produits en alerte de stock
+        $lowStockProducts = Product::where('stock', '<=', 5)
+            ->orderBy('stock', 'asc')
+            ->get();
+
+        return view('storekeeper.dashboard', compact(
+            'totalProducts',
+            'totalStock',
+            'lowStockCount',
+            'monthlyEntries',
+            'recentMovements',
+            'lowStockProducts'
+        ));
+    }
     // Vue Liste / État du stock
     public function stock(Request $request)
     {

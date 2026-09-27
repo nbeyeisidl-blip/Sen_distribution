@@ -33,17 +33,27 @@
                                     VTE-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}
                                 </td>
                                 <td>{{ $order->client->name ?? $order->client->nom ?? 'Client Comptoir' }}</td>
-                                <td class="small text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="small text-muted">
+                                    {{ optional($order->created_at)->format('d/m/Y H:i') ?? '-' }}
+                                </td>
                                 <td>
                                     <span class="badge bg-light text-dark border">
                                         {{ ucfirst($order->payment_method ?? 'Espèces') }}
                                     </span>
                                 </td>
-                                <td class="fw-bold">{{ number_format($order->total, 0, ',', ' ') }} FCFA</td>
+                                <td class="fw-bold">
+                                    {{ number_format($order->total ?? $order->total_amount ?? 0, 0, ',', ' ') }} FCFA
+                                </td>
                                 <td class="text-end">
-                                    <a href="{{ route('cashier.invoice', $order->id) }}" class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-printer me-1"></i> Voir / Imprimer
-                                    </a>
+                                    @if(Route::has('cashier.invoice'))
+                                        <a href="{{ route('cashier.invoice', $order->id) }}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-printer me-1"></i> Voir / Imprimer
+                                        </a>
+                                    @else
+                                        <a href="#" class="btn btn-sm btn-outline-secondary disabled">
+                                            <i class="bi bi-printer me-1"></i> Voir / Imprimer
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -57,7 +67,7 @@
                 </table>
             </div>
         </div>
-        @if($orders->hasPages())
+        @if(method_exists($orders, 'hasPages') && $orders->hasPages())
             <div class="card-footer bg-white py-3">
                 {{ $orders->links() }}
             </div>

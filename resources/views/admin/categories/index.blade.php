@@ -118,15 +118,14 @@
                                                 <div class="mb-3">
                                                     <label class="form-label fw-bold">Description</label>
                                                     <textarea name="description" class="form-control" rows="3">{{ $category->description }}</textarea>
-                                                </div>
-                                                <div class="mb-3">
-    <label for="parent_id" class="form-label">Catégorie Parente</label>
-    <select name="parent_id" id="parent_id" class="form-select">
-        <option value="">Aucune (Créer comme Catégorie Principale)</option>
-        @foreach($parentCategories as $parent)
-            <option value="{{ $parent->id }}">{{ $parent->name }}</option>
-        @endforeach
-    </select>
+                                              <div class="mb-3">
+    <label class="form-label">Catégorie Parente</label>
+    <select name="parent_id" class="form-select">
+    <option value="">Aucune (Créer comme Catégorie Principale)</option>
+    @foreach($parentCategories as $parent)
+        <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+    @endforeach
+</select>
 </div>
                                             </div>
                                             <div class="modal-footer">

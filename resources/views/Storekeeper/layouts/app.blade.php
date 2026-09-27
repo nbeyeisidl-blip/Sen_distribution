@@ -78,11 +78,6 @@
         <i class="bi bi-box me-2"></i> Produits
     </a>
 
-    {{-- Stock --}}
-    <a href="{{ route('storekeeper.stock.index') }}" class="{{ request()->routeIs('storekeeper.stock.index') ? 'active' : '' }}">
-        <i class="bi bi-diagram-3 me-2"></i> Stock
-    </a>
-
     {{-- Entrée de stock --}}
     <a href="{{ route('storekeeper.stock.entry') }}" class="{{ request()->routeIs('storekeeper.stock.entry') ? 'active' : '' }}">
         <i class="bi bi-arrow-down-right-square me-2"></i> Entrée de stock
@@ -104,10 +99,7 @@
 <a href="{{ route('storekeeper.notifications.index') }}" class="nav-link {{ request()->routeIs('storekeeper.notifications.*') ? 'active' : '' }}">
     <i class="bi bi-bell me-2"></i> Notifications
 </a>
-                </nav>
-            </div>
-
-            <div>
+<div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="btn btn-danger w-100 fw-bold d-flex align-items-center justify-content-center gap-2">
@@ -115,6 +107,12 @@
                     </button>
                 </form>
             </div>
+
+</div>
+
+            
+                </nav>
+            
         </div>
 
         {{-- CONTENU PRINCIPAL --}}

@@ -1,80 +1,76 @@
 @extends('cashier.layouts.app')
 
-
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid px-4 py-3">
 
-    {{-- EN-TÊTE DU TABLEAU DE BORD --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- En-tête -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
         <div>
-            <h1 class="h3 fw-bold text-dark mb-1">Tableau de bord</h1>
-            <p class="text-muted small mb-0">Interface Caissier - SEN DISTRIBUTION</p>
+            <h4 class="fw-bold mb-1 text-dark">Tableau de bord</h4>
+            <p class="text-muted mb-0 small">Interface Caissier — SEN DISTRIBUTION</p>
         </div>
-        <div class="d-flex align-items-center gap-3">
-            <div class="position-relative">
-                <i class="bi bi-bell fs-4"></i>
-                @if(auth()->user()->unreadNotifications->count() > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                @endif
-            </div>
-            <div class="d-flex align-items-center gap-2 border-start ps-3">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                    <i class="bi bi-person-fill fs-5"></i>
-                </div>
-                <span class="fw-semibold text-dark">{{ auth()->user()->name ?? 'Caissier' }}</span>
-            </div>
-        </div>
+        <a href="{{ route('cashier.sales.create') }}" class="btn btn-primary px-3 py-2 rounded-3 fw-semibold shadow-sm">
+            <i class="bi bi-cart-plus me-2"></i>Nouvelle vente
+        </a>
     </div>
 
-    {{-- 1. CARTES D'INDICATEURS (KPIs) --}}
+    <!-- Stat cartes / Métriques -->
     <div class="row g-3 mb-4">
-        
-        {{-- Total Ventes --}}
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <span class="text-muted small fw-semibold">Ventes</span>
-                    <h2 class="fw-bold text-dark my-2">{{ $salesCount ?? 0 }}</h2>
+ <!-- Carte Ventes -->
+<div class="card border-0 shadow-sm p-3 rounded-3">
+    <div class="d-flex align-items-center">
+        <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 me-3">
+            <i class="bi bi-bag fs-3"></i>
+        </div>
+        <div>
+            <span class="text-muted small">Ventes</span>
+            {{-- Utiliser $totalSalesCount ici --}}
+            <h4 class="fw-bold mb-0">{{ $totalSalesCount ?? count($recentSales ?? []) }}</h4>
+        </div>
+    </div>
+</div>
+
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="p-3 bg-success bg-opacity-10 rounded-3 text-success me-3">
+                        <i class="bi bi-currency-exchange fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Ventes du mois — Montant</span>
+                        <h4 class="fw-bold mb-0 mt-1">{{ number_format($monthlyTotal ?? 0, 0, ',', ' ') }} FCFA</h4>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Montant Total --}}
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <span class="text-muted small fw-semibold">Ventes du mois - Montant</span>
-                    <h2 class="fw-bold text-primary my-2">
-                        {{ number_format($totalAmount ?? 0, 0, ',', ' ') }} <span class="fs-6 text-dark">FCFA</span>
-                    </h2>
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="p-3 bg-warning bg-opacity-10 rounded-3 text-warning me-3">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Commandes en attente</span>
+                        <h4 class="fw-bold mb-0 mt-1">{{ $pendingOrdersCount ?? 1 }}</h4>
+                    </div>
                 </div>
             </div>
         </div>
-
-        {{-- Commandes en attente --}}
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <span class="text-muted small fw-semibold">Commandes en attente</span>
-                    <h2 class="fw-bold text-dark my-2">{{ $pendingOrders ?? 0 }}</h2>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    {{-- 2. SECTION PRINCIPALE (DERNIÈRES VENTES + TOP PRODUITS) --}}
+    <!-- Tableaux et sections -->
     <div class="row g-4">
-
-        {{-- TABLEAU DES DERNIÈRES VENTES --}}
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h6 class="fw-bold text-dark mb-0">Dernières ventes</h6>
+        <!-- Dernières ventes -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">Dernières ventes</h6>
+                    <a href="#" class="text-primary text-decoration-none small fw-semibold">Voir tout</a>
                 </div>
                 <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead class="table-light small text-muted">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light rounded-2 text-muted small">
                             <tr>
                                 <th>N° Vente</th>
                                 <th>Client</th>
@@ -84,75 +80,93 @@
                                 <th>Statut</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @forelse($recentSales as $sale)
-                                <tr>
-                                    <td class="fw-bold text-secondary">VTE-{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</td>
-                                    <td>{{ $sale->client->name ?? $sale->client->nom ?? 'Client Comptoir' }}</td>
-                                    <td>{{ $sale->items->first()->product->name ?? $sale->items->first()->product->nom ?? 'Articles multiples' }}</td>
-                                    <td class="fw-bold">{{ number_format($sale->total, 0, ',', ' ') }} FCFA</td>
-                                    <td>
-                                        <span class="badge bg-light text-dark border">
-                                            {{ ucfirst($sale->payment_method ?? 'Espèces') }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if($sale->status === 'completed' || $sale->status === 'confirmed')
-                                            <span class="text-success"><i class="bi bi-check-lg me-1"></i>Payé</span>
-                                        @else
-                                            <span class="text-warning"><i class="bi bi-clock me-1"></i>En attente</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center py-4 text-muted">
-                                        Aucune vente enregistrée récemment.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
+                        <tbody class="small">
+    @forelse($recentSales ?? [] as $sale)
+        <tr>
+            <!-- Numéro de vente -->
+            <td class="fw-bold text-dark">
+                VTE-{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}
+            </td>
+
+            <!-- Nom du Client -->
+            <td>
+                {{ $sale->client->name ?? $sale->client->nom ?? 'Client comptant' }}
+            </td>
+
+            <!-- Produit(s) -->
+            <td class="text-muted">
+                @if(isset($sale->items) && $sale->items->count() > 0)
+                    @if($sale->items->count() === 1)
+                        {{ $sale->items->first()->product->name ?? $sale->items->first()->product->nom ?? 'Produit' }}
+                    @else
+                        Articles multiples ({{ $sale->items->count() }})
+                    @endif
+                @else
+                    Articles multiples
+                @endif
+            </td>
+
+            <!-- Montant Total -->
+            <td class="fw-bold">
+                {{ number_format($sale->total ?? $sale->total_amount ?? 0, 0, ',', ' ') }} FCFA
+            </td>
+
+            <!-- Mode de Paiement -->
+            <td>
+                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 px-2 py-1 rounded-2">
+                    {{ ucfirst($sale->payment_method ?? 'Espèces') }}
+                </span>
+            </td>
+
+            <!-- Statut de la vente -->
+            <td>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 px-2 py-1 rounded-2">
+                    {{ ucfirst($sale->status ?? 'Payée') }}
+                </span>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-3 d-block mb-2 text-secondary"></i>
+                Aucune vente récente enregistrée
+            </td>
+        </tr>
+    @endforelse
+</tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        {{-- PANNEAU DROIT : TOP PRODUITS & BOUTON NOUVELLE VENTE --}}
-        <div class="col-lg-4">
-
-            {{-- Top produits vendus --}}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h6 class="fw-bold text-dark mb-0">Top produits vendus</h6>
+        <!-- Carte Top Produits Vendus -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-transparent border-0 pt-3 px-3">
+        <h6 class="fw-bold mb-0">Top produits vendus</h6>
+    </div>
+    <div class="card-body p-3">
+        @forelse($topProducts ?? [] as $item)
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                <div>
+                    <h6 class="mb-0 fw-semibold text-dark">
+                        {{ $item->product->name ?? $item->product->nom ?? 'Produit #' . $item->product_id }}
+                    </h6>
+                    <small class="text-muted">
+                        {{ $item->total_qty }} vendu(s)
+                    </small>
                 </div>
-                <div class="list-group list-group-flush">
-                    @forelse($topProducts as $index => $product)
-                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <span class="fw-bold text-muted me-2">{{ $index + 1 }}.</span>
-                            <span class="fw-semibold text-dark flex-grow-1">{{ $product->name ?? $product->nom }}</span>
-                            <span class="badge bg-light text-dark border fw-normal">
-                                {{ number_format($product->price, 0, ',', ' ') }} FCFA
-                            </span>
-                        </div>
-                    @empty
-                        <div class="list-group-item text-center text-muted py-3">
-                            Aucun produit vendu.
-                        </div>
-                    @endforelse
+                <div class="fw-bold text-primary">
+                    {{ number_format($item->total_amount ?? 0, 0, ',', ' ') }} FCFA
                 </div>
             </div>
-
-            {{-- Bouton d'action directe --}}
-            <div class="text-center">
-                <a href="{{ route('cashier.sales.create') }}" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
-                    <i class="bi bi-cart-plus fs-4"></i>
-                    <span>Nouvelle vente</span>
-                </a>
-                <small class="text-muted d-block mt-2">Créer une nouvelle vente en caisse</small>
+        @empty
+            <div class="text-center text-muted py-4">
+                <i class="bi bi-box-seam fs-3 d-block mb-2 text-secondary"></i>
+                <p class="mb-0 small">Aucun produit vendu pour le moment</p>
             </div>
-
-        </div>
-
+        @endforelse
+    </div>
+</div>
     </div>
 
 </div>

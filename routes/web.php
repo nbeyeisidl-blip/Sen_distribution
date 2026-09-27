@@ -153,6 +153,16 @@ Route::middleware(['auth'])
         Route::post('/notifications/{id}/read', [CashierController::class, 'markAsRead'])->name('notifications.markRead');
         Route::post('/notifications/read-all', [CashierController::class, 'markAllAsRead'])->name('notifications.markAll');
     });
+    
+
+Route::prefix('cashier')->name('cashier.')->middleware(['auth'])->group(function () {
+    Route::get('/sales/create', [CashierController::class, 'create'])->name('sales.create');
+    Route::post('/sales', [CashierController::class, 'store'])->name('sales.store');
+    
+    // Routes de gestion du panier
+    Route::get('/cart/remove/{id}', [CashierController::class, 'removeCartItem'])->name('cart.remove');
+    Route::get('/cart/clear', [CashierController::class, 'clearCart'])->name('cart.clear');
+});
 
 
 // ======================================================

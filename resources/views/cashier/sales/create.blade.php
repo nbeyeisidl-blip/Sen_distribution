@@ -1,270 +1,196 @@
 @extends('cashier.layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid px-4 py-3">
 
-    {{-- EN-TÊTE --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h1 class="h3 fw-bold text-dark mb-1">Nouvelle Vente</h1>
-            <p class="text-muted small mb-0">Interface Point de Vente (POS) - SEN DISTRIBUTION</p>
+            <h4 class="fw-bold mb-0">Nouvelle Vente</h4>
+            <p class="text-muted small mb-0">Interface Point de Vente (POS) — SEN DISTRIBUTION</p>
         </div>
-        <a href="{{ route('cashier.dashboard') }}" class="btn btn-outline-secondary fw-bold">
-            <i class="bi bi-arrow-left me-1"></i> Tableau de bord
+        <a href="{{ route('cashier.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Tableau de bord
         </a>
     </div>
 
+    <!-- Notifications Flash -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
     @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-    <form action="{{ route('cashier.sales.store') }}" method="POST" id="saleForm">
-        @csrf
+    <div class="row g-3">
+        <!-- CÔTÉ GAUCHE : PANIER & FORMULAIRE -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+                
+                <form action="{{ route('cashier.sales.store') }}" method="POST">
+                    @csrf
 
-        <div class="row g-4">
+                    <!-- Sélection du Client (SANS 'required') -->
+                    <div class="mb-3">
+                        <label for="client_id" class="form-label fw-bold text-secondary small mb-1">CLIENT</label>
+                        <select name="client_id" id="client_id" class="form-select border-1">
+                            <option value="">-- Client de passage (Anonyme) --</option>
+                            @foreach($clients as $client)
+                                <option value="{{ $client->id }}">
+                                    {{ $client->name }} {{ $client->phone ? '('.$client->phone.')' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-            {{-- SECTION GAUCHE : PANIER DE CAISSE --}}
-            <div class="col-lg-7">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-
-                        {{-- Choix du client --}}
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-dark small">Client</label>
-                            <select name="client_id" class="form-select form-select-lg" required>
-                                <option value="">Sélectionner un client...</option>
-                                @foreach($clients as $client)
-                                    <option value="{{ $client->id }}">
-                                        {{ $client->name ?? $client->nom }} ({{ $client->phone ?? 'Pas de numéro' }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        {{-- Tableau dynamic du panier --}}
-                        <div class="table-responsive mb-4">
-                            <table class="table align-middle" id="cartTable">
-                                <thead class="table-light small text-muted">
+                    <!-- Tableau du Panier -->
+                    <div class="table-responsive mb-3" style="min-height: 200px; max-height: 350px; overflow-y: auto;">
+                        <table class="table align-middle table-hover">
+                            <thead class="table-light sticky-top">
+                                <tr class="small text-muted">
+                                    <th>Produit</th>
+                                    <th class="text-center">Prix U.</th>
+                                    <th class="text-center">Qté</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($cart as $id => $item)
                                     <tr>
-                                        <th>Produit</th>
-                                        <th style="width: 120px;">Prix U.</th>
-                                        <th style="width: 110px;">Qté</th>
-                                        <th style="width: 130px;">Total</th>
-                                        <th style="width: 50px;" class="text-center">Action</th>
+                                        <td class="fw-semibold text-dark">{{ $item['name'] }}</td>
+                                        <td class="text-center">{{ number_format($item['price'], 0, ',', ' ') }} FCFA</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border px-2 py-1">{{ $item['quantity'] }}</span>
+                                        </td>
+                                        <td class="text-end fw-bold">{{ number_format($item['price'] * $item['quantity'], 0, ',', ' ') }} FCFA</td>
+                                        <td class="text-end">
+                                            <a href="{{ route('cashier.cart.remove', $id) }}" class="btn btn-sm btn-outline-danger border-0">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody id="cartBody">
-                                    <tr id="emptyCartRow">
-                                        <td colspan="5" class="text-center py-4 text-muted">
-                                            <i class="bi bi-cart-x fs-3 d-block mb-2"></i>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-5">
+                                            <i class="bi bi-cart-x fs-2 d-block mb-2 opacity-50"></i>
                                             Panier vide. Cliquez sur un produit dans le catalogue à droite.
                                         </td>
                                     </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {{-- Total et Remises --}}
-                        <div class="bg-light p-3 rounded mb-4">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Sous-total :</span>
-                                <strong id="subtotalDisplay">0 FCFA</strong>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="text-muted">Remise (FCFA) :</span>
-                                <input type="number" name="discount" id="discountInput" class="form-control form-control-sm text-end w-25" value="0" min="0" oninput="calculateTotals()">
-                            </div>
-                            <hr class="my-2">
-                            <div class="d-flex justify-content-between fs-4 fw-bold text-primary">
-                                <span>Total net :</span>
-                                <span id="totalDisplay">0 FCFA</span>
-                            </div>
-                        </div>
-
-                        {{-- Mode de paiement & Validation --}}
-                        <div class="row g-3">
-                            <div class="col-12 mb-2">
-                                <label class="form-label fw-bold text-dark small">Mode de paiement</label>
-                                <div class="d-flex gap-3">
-                                    <div class="form-check flex-fill border p-3 rounded">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="payCash" value="espèces" checked>
-                                        <label class="form-check-label fw-bold" for="payCash">Espèces</label>
-                                    </div>
-                                    <div class="form-check flex-fill border p-3 rounded">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="payWave" value="wave">
-                                        <label class="form-check-label fw-bold" for="payWave">Wave</label>
-                                    </div>
-                                    <div class="form-check flex-fill border p-3 rounded">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="payOM" value="orange_money">
-                                        <label class="form-check-label fw-bold" for="payOM">Orange Money</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <a href="{{ route('cashier.dashboard') }}" class="btn btn-outline-secondary w-100 py-2 fw-bold">Annuler</a>
-                            </div>
-                            <div class="col-6">
-                               <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" id="submitBtn" disabled>
-    <i class="bi bi-check-circle me-1"></i> Valider la vente
-</button>
-                            </div>
-                        </div>
-
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                </div>
+
+                    <!-- Totaux & Récapitulatif -->
+                    <div class="bg-light p-3 rounded-3 mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Sous-total :</span>
+                            <span class="fw-semibold">{{ number_format($subtotal, 0, ',', ' ') }} FCFA</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Remise (FCFA) :</span>
+                            <input type="number" name="discount" class="form-control form-control-sm w-25 text-end" value="0" min="0">
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
+                            <span>Total net :</span>
+                            <span>{{ number_format($subtotal, 0, ',', ' ') }} FCFA</span>
+                        </div>
+                    </div>
+
+                    <!-- Mode de paiement -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small mb-2">MODE DE PAIEMENT</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="especes" value="Espèces" checked>
+                                <label class="form-check-label fw-semibold" for="especes">Espèces</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="wave" value="Wave">
+                                <label class="form-check-label fw-semibold" for="wave">Wave</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="om" value="Orange Money">
+                                <label class="form-check-label fw-semibold" for="om">Orange Money</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons d'actions -->
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <a href="{{ route('cashier.cart.clear') }}" class="btn btn-outline-secondary w-100 fw-semibold">Annuler</a>
+                        </div>
+                        <div class="col-8">
+                            <button type="submit" class="btn btn-primary w-100 fw-semibold {{ empty($cart) ? 'disabled' : '' }}">
+                                <i class="bi bi-check-circle me-1"></i>Valider la vente
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
             </div>
-
-            {{-- SECTION DROITE : CATALOGUE PRODUITS --}}
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                            <input type="text" id="searchProduct" class="form-control border-start-0 bg-light" placeholder="Rechercher un produit..." onkeyup="filterProducts()">
-                        </div>
-                    </div>
-                    <div class="card-body overflow-auto" style="max-height: 550px;">
-                        <div class="list-group list-group-flush" id="productList">
-                            @foreach($products as $product)
-                                <button type="button" 
-                                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 product-item"
-                                        data-name="{{ strtolower($product->name ?? $product->nom) }}"
-                                        onclick="addToCart({{ $product->id }}, '{{ addslashes($product->name ?? $product->nom) }}', {{ $product->price }}, {{ $product->stock }})">
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ $product->name ?? $product->nom }}</div>
-                                        <small class="text-muted">En stock: {{ $product->stock }}</small>
-                                    </div>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold fs-6">
-                                        {{ number_format($product->price, 0, ',', ' ') }} FCFA
-                                    </span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </form>
+
+        <!-- CÔTÉ DROIT : CATALOGUE PRODUITS -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+                <h6 class="fw-bold mb-3">Catalogue Produits</h6>
+                
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchProduct" class="form-control bg-light border-start-0" placeholder="Rechercher un produit...">
+                </div>
+
+                <div class="row g-2 overflow-auto" style="max-height: 520px;" id="productList">
+                    @forelse($products as $product)
+                        <div class="col-6 product-item">
+                            <div class="card h-100 border p-2 text-center rounded-3 bg-light shadow-2-hover">
+                                <h6 class="fw-bold text-dark mb-1 small text-truncate" title="{{ $product->name }}">{{ $product->name }}</h6>
+                                <p class="text-muted extra-small mb-1">Stock : {{ $product->stock }}</p>
+                                <p class="fw-bold text-primary mb-2 small">{{ number_format($product->price, 0, ',', ' ') }} FCFA</p>
+                                <a href="{{ route('cashier.sales.create', ['product_id' => $product->id]) }}" 
+                                   class="btn btn-sm btn-primary w-100 py-1 extra-small fw-semibold">
+                                   + Vendre
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12 text-center py-4 text-muted">Aucun produit disponible</div>
+                    @endforelse
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </div>
 
+<!-- Recherche dynamique JS côté client -->
 <script>
-    let cart = {};
-
-    function addToCart(id, name, price, maxStock) {
-        if (cart[id]) {
-            if (cart[id].quantity < maxStock) {
-                cart[id].quantity++;
+    document.getElementById('searchProduct').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let items = document.querySelectorAll('.product-item');
+        items.forEach(function(item) {
+            let name = item.querySelector('h6').textContent.toLowerCase();
+            if(name.includes(filter)) {
+                item.style.display = "";
             } else {
-                alert('Stock maximal disponible atteint pour ce produit.');
-                return;
+                item.style.display = "none";
             }
-        } else {
-            cart[id] = { id: id, name: name, price: price, quantity: 1, maxStock: maxStock };
-        }
-        renderCart();
-    }
-
-    function removeFromCart(id) {
-        delete cart[id];
-        renderCart();
-    }
-
-    function updateQuantity(id, qty) {
-        qty = parseInt(qty);
-        if (qty > cart[id].maxStock) {
-            alert('Stock insuffisant');
-            cart[id].quantity = cart[id].maxStock;
-        } else if (qty <= 0 || isNaN(qty)) {
-            removeFromCart(id);
-            return;
-        } else {
-            cart[id].quantity = qty;
-        }
-        renderCart();
-    }
-
-    function renderCart() {
-        const cartBody = document.getElementById('cartBody');
-        const submitBtn = document.getElementById('submitBtn');
-        const items = Object.values(cart);
-
-        // Si le panier est vide
-        if (items.length === 0) {
-            cartBody.innerHTML = `
-                <tr id="emptyCartRow">
-                    <td colspan="5" class="text-center py-4 text-muted">
-                        <i class="bi bi-cart-x fs-3 d-block mb-2"></i>
-                        Panier vide. Cliquez sur un produit dans le catalogue à droite.
-                    </td>
-                </tr>`;
-            if (submitBtn) {
-                submitBtn.disabled = true; // RESTE DÉSACTIVÉ SI VIDE
-            }
-            calculateTotals();
-            return;
-        }
-
-        // SI LE PANIER CONTIENT AU MOINS UN PRODUIT : ACTIVER LE BOUTON
-        if (submitBtn) {
-            submitBtn.disabled = false;
-        }
-
-        let html = '';
-        items.forEach((item, index) => {
-            const itemTotal = item.price * item.quantity;
-            html += `
-                <tr>
-                    <td>
-                        <div class="fw-bold text-dark small">${item.name}</div>
-                        <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
-                        <input type="hidden" name="items[${index}][price]" value="${item.price}">
-                        <input type="hidden" name="items[${index}][quantity]" value="${item.quantity}">
-                    </td>
-                    <td class="small">${item.price.toLocaleString('fr-FR')} FCFA</td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm text-center" 
-                               value="${item.quantity}" min="1" max="${item.maxStock}" 
-                               onchange="updateQuantity(${item.id}, this.value)">
-                    </td>
-                    <td class="fw-bold text-primary small">${itemTotal.toLocaleString('fr-FR')} FCFA</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeFromCart(${item.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                </tr>`;
         });
-
-        cartBody.innerHTML = html;
-        calculateTotals();
-    }
-
-    function calculateTotals() {
-        let subtotal = 0;
-        Object.values(cart).forEach(item => {
-            subtotal += item.price * item.quantity;
-        });
-
-        const discountInput = parseInt(document.getElementById('discountInput').value) || 0;
-        const total = Math.max(0, subtotal - discountInput);
-
-        document.getElementById('subtotalDisplay').innerText = subtotal.toLocaleString('fr-FR') + ' FCFA';
-        document.getElementById('totalDisplay').innerText = total.toLocaleString('fr-FR') + ' FCFA';
-    }
-
-    function filterProducts() {
-        const query = document.getElementById('searchProduct').value.toLowerCase();
-        const items = document.querySelectorAll('.product-item');
-
-        items.forEach(item => {
-            const name = item.getAttribute('data-name');
-            item.style.display = name.includes(query) ? 'flex' : 'none';
-        });
-    }
+    });
 </script>
+
+<style>
+    .extra-small { font-size: 0.75rem; }
+</style>
 @endsection

@@ -27,9 +27,9 @@ class Category extends Model
 
     // Relation pour obtenir les sous-catégories d'une catégorie
     public function children()
-    {
-        return $this->hasMany(Category::class, 'parent_id');
-    }
+{
+    return $this->hasMany(Category::class, 'parent_id');
+}
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

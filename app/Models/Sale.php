@@ -13,7 +13,7 @@ class Sale extends Model
     'client_id',
     'client_name',
     'total',
-    'total_amount',
+    
     'payment_method',
     'montant_total',
 ];
@@ -28,8 +28,17 @@ class Sale extends Model
         return $this->belongsTo(User::class, 'client_id');
     }
 
-    public function items(): HasMany
+   public function items()
     {
-        return $this->hasMany(SaleItem::class, 'sale_id');
+        return $this->hasMany(SaleItem::class); 
+        // Si votre modèle s'appelle SaleDetail, mettez SaleDetail::class
+    }
+    public function saleItems()
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+    public function details()
+    {
+        return $this->hasMany(SaleDetail::class); // ou SaleItem::class selon votre projet
     }
 }
