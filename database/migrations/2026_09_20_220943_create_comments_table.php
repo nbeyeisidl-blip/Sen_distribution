@@ -10,12 +10,15 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
+{
+    if (!Schema::hasTable('comments')) {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
+            // Conservez ici toutes les autres colonnes définies dans votre fichier d'origine
             $table->timestamps();
         });
     }
+}
 
     /**
      * Reverse the migrations.

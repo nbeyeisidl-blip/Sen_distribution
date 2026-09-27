@@ -9,12 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
+  public function up(): void
 {
     Schema::table('products', function (Blueprint $table) {
-        $table->string('size')->nullable()->after('stock'); // Ex: S, M, L, XL, 42, 43
-        $table->string('color')->nullable()->after('size'); // Ex: Noir, Rouge, Bleu
-        $table->enum('gender', ['homme', 'femme', 'mixte', 'enfant'])->default('mixte')->after('color');
+        if (!Schema::hasColumn('products', 'size')) {
+            $table->string('size')->nullable(); // Adaptez le type de données selon votre migration originale
+        }
+        // Faites de même si d'autres colonnes de cette migration posent problème
     });
 }
 
